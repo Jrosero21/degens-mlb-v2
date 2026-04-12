@@ -360,6 +360,13 @@ a{color:inherit;text-decoration:none}
 .sb-kelly-meter-seg.is-filled{background:var(--sb-purple)}
 .sb-game-tag-edge{background:rgba(168,85,247,0.1);color:var(--sb-purple);border:1px solid rgba(168,85,247,0.2)}
 .sb-kelly-no-edge{color:var(--sb-muted);font-style:italic;font-size:12px;padding:8px 0}
+.sb-kelly-help{
+  font-size:10px;font-weight:600;padding:3px 8px;border-radius:99px;
+  background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);
+  color:var(--sb-purple);cursor:pointer;margin-left:8px;vertical-align:middle;
+  font-family:inherit;transition:background 0.2s;
+}
+.sb-kelly-help:active{background:rgba(168,85,247,0.2)}
 
 /* ─── STARTED GAMES ─── */
 .sb-game.is-started{opacity:0.55}
@@ -730,7 +737,7 @@ function buildCard(g){
         </div>
         ${g.has_kelly_edge?`
         <div class="sb-kelly-section">
-          <div class="sb-kelly-section-title">Kelly Criterion Sizing</div>
+          <div class="sb-kelly-section-title">Kelly Criterion Sizing <button class="sb-kelly-help" onclick="event.stopPropagation();document.getElementById('chat-panel').classList.add('is-open');document.getElementById('chat-input').value='explain how Kelly criterion works and how to read the bet sizing on this board';handleChat()">What's this?</button></div>
           <div class="sb-kelly-grid">
             <div class="sb-kelly-cell">
               <span class="sb-detail-label">Edge Over Odds</span>
@@ -1181,6 +1188,33 @@ function generateAIResponse(query){
     const legs = legMatch ? parseInt(legMatch[1]) : 3;
     if(!pickPool.length) return "All games have already started or finished -- no upcoming games to build a parlay from.";
     return buildParlayAnalysis(pickPool, Math.min(Math.max(legs, 2), 6));
+  }
+
+  // ─── KELLY EXPLANATION ───
+  if(q.includes("explain")&&q.includes("kelly")||q.includes("what is kelly")||q.includes("what's kelly")||q.includes("how does kelly")||q.includes("how kelly works")||q.includes("what's this")&&q.includes("kelly")){
+    let resp = `<strong>Kelly Criterion -- How It Works:</strong><br><br>`;
+    resp+=`Kelly criterion is a formula that tells you <strong>how much</strong> to bet based on your edge. Instead of flat-betting the same amount on every game, Kelly sizes your bets proportionally -- bigger bets when the edge is bigger, smaller bets when it's thin.<br><br>`;
+    resp+=`<strong>The formula:</strong><br>`;
+    resp+=`Kelly % = (edge) / (decimal odds - 1)<br>`;
+    resp+=`Where <strong>edge</strong> = model's win probability minus the implied probability from Vegas odds.<br><br>`;
+    resp+=`<strong>How to read the board:</strong><br>`;
+    resp+=`-- <strong>Edge Over Odds</strong>: How much better our model thinks the pick is vs what the odds imply. +17% means we see a 17% advantage.<br>`;
+    resp+=`-- <strong>Half Kelly %</strong>: The recommended bet size as a percentage of your bankroll. We use half Kelly (not full) because it's less volatile while still capturing most of the edge.<br>`;
+    resp+=`-- <strong>Signal Strength</strong>: Strong (15%+ bet size), Moderate (5-15%), Small (1-5%), Tiny (&lt;1%).<br>`;
+    resp+=`-- <strong>The purple meter</strong>: Visual indicator -- more bars filled = stronger signal.<br><br>`;
+    resp+=`<strong>Example:</strong><br>`;
+    const example = pickPool.find(g=>g.has_kelly_edge&&g.kelly_half_pct>=5);
+    if(example){
+      resp+=`${t(example.away_team)} @ ${t(example.home_team)}: Our model gives ${t(example.projected_winner)} a ${fP(example.projected_confidence_pct)} chance to win. Vegas odds imply about ${((1-example.kelly_edge)*100-example.projected_confidence_pct+100).toFixed(0)}%. `;
+      resp+=`That ${(example.kelly_edge*100).toFixed(1)}% gap is the edge. Half Kelly says bet ${fKelly(example.kelly_half_pct)} of your bankroll.<br>`;
+      resp+=`On a $500 bankroll, that's <strong>$${Math.round(500*example.kelly_half_pct/100)}</strong>.<br><br>`;
+    }
+    resp+=`<strong>Rules of thumb:</strong><br>`;
+    resp+=`-- Half Kelly is the sweet spot for most bettors -- full Kelly is too aggressive<br>`;
+    resp+=`-- If "Edge Over Odds" is negative or zero, Kelly says don't bet -- the odds are already too good<br>`;
+    resp+=`-- Never bet more than 15% of your bankroll on a single game regardless of Kelly<br>`;
+    resp+=`-- Try asking me "bet sizes for a $500 bankroll" for specific dollar amounts`;
+    return resp;
   }
 
   // ─── BANKROLL / BET SIZE / KELLY SIZING ───
