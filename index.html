@@ -361,6 +361,20 @@ a{color:inherit;text-decoration:none}
 .sb-game-tag-edge{background:rgba(168,85,247,0.1);color:var(--sb-purple);border:1px solid rgba(168,85,247,0.2)}
 .sb-kelly-no-edge{color:var(--sb-muted);font-style:italic;font-size:12px;padding:8px 0}
 
+/* ─── STARTED GAMES ─── */
+.sb-game.is-started{opacity:0.55}
+.sb-game.is-started .sb-conf-fill,.sb-game.is-started .sb-kelly-bar-fill{opacity:0.4}
+.sb-started-label{
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;
+  color:var(--sb-muted);padding:2px 8px;border-radius:99px;
+  background:rgba(255,255,255,0.05);border:1px solid var(--sb-border);
+}
+.sb-started-divider{
+  grid-column:1/-1;display:flex;align-items:center;gap:12px;
+  padding:8px 0;color:var(--sb-muted);font-size:12px;font-weight:600;
+}
+.sb-started-divider::before,.sb-started-divider::after{content:'';flex:1;height:1px;background:var(--sb-border)}
+
 /* ─── EMPTY STATE ─── */
 .sb-empty{padding:24px;text-align:center;color:var(--sb-muted);border:1px dashed var(--sb-border);border-radius:var(--sb-radius)}
 
@@ -622,11 +636,13 @@ function buildCard(g){
   const runlineText = g.projected_runline_pick ? `${tText(g.projected_runline_pick)}${g.projected_runline_confidence_pct!=null?` (${fP(g.projected_runline_confidence_pct)})`:""}` : "--";
   const ouText = g.projected_ou_pick ? `${g.projected_ou_pick} ${fN(g.vegas_total_line)}${g.projected_ou_confidence_pct!=null?` (${fP(g.projected_ou_confidence_pct)})`:""}` : (g.vegas_total_line!=null?`Line: ${fN(g.vegas_total_line)}`:"--");
 
+  const isStarted = g.commence_time_utc ? new Date(g.commence_time_utc) <= new Date() : false;
+
   return `
-  <article class="sb-game${isOpen?" is-open":""}${isBest?" is-best-bet":""}${isDisagree?" is-disagree":""}" data-pk="${g.gamePk}">
+  <article class="sb-game${isOpen?" is-open":""}${isBest?" is-best-bet":""}${isDisagree?" is-disagree":""}${isStarted?" is-started":""}" data-pk="${g.gamePk}">
     <button class="sb-game-head" data-pk="${g.gamePk}">
       <div class="sb-game-top">
-        <span class="sb-game-time">${fTime(g.commence_time_utc)}</span>
+        <span class="sb-game-time">${fTime(g.commence_time_utc)}${isStarted?' <span class="sb-started-label">Started</span>':''}</span>
         <div class="sb-game-tags">${tags}</div>
       </div>
       <div class="sb-game-teams">
@@ -843,8 +859,22 @@ function renderBoard(games,recentGames){
     }
   });
 
+  // Split into upcoming vs started
+  const now = new Date();
+  const upcoming = filtered.filter(g=>!g.commence_time_utc || new Date(g.commence_time_utc) > now);
+  const started = filtered.filter(g=>g.commence_time_utc && new Date(g.commence_time_utc) <= now);
+
   const board = document.getElementById("board");
-  board.innerHTML = filtered.length?filtered.map(g=>buildCard(g)).join(""):'<div class="sb-empty">No games match this filter.</div>';
+  if(!filtered.length){
+    board.innerHTML='<div class="sb-empty">No games match this filter.</div>';
+  } else {
+    let html = upcoming.map(g=>buildCard(g)).join("");
+    if(started.length && upcoming.length){
+      html+=`<div class="sb-started-divider">Started / In Progress (${started.length})</div>`;
+    }
+    html+=started.map(g=>buildCard(g)).join("");
+    board.innerHTML=html;
+  }
 }
 
 // ─── CARD INTERACTIONS ───
