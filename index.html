@@ -1838,7 +1838,19 @@ async function fetchLiveScores(){
         lastUpdate: event.last_update
       };
     });
+    // Check if any completion status changed — if so, re-render to re-sort sections
+    const completionsChanged = Object.keys(newScores).some(key => {
+      const was = liveScores[key]?.completed;
+      const now = newScores[key]?.completed;
+      return was !== now;
+    }) || Object.keys(newScores).length !== Object.keys(liveScores).length;
+
     liveScores = newScores;
+
+    if(completionsChanged){
+      // Re-render board to move games between Live/Finished sections
+      renderBoard(state.data?.games||[], state.data?.recentGames||[]);
+    }
     updateLiveScoreCards();
     console.log(`Live scores updated: ${Object.keys(newScores).length} games`);
   }catch(e){
