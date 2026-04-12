@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<title>Degens MLB - Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --sb-bg: #0b1120;
+  --sb-surface: #111827;
+  --sb-surface-2: #1a2436;
+  --sb-border: rgba(255,255,255,0.07);
+  --sb-text: #f1f5f9;
+  --sb-muted: #64748b;
+  --sb-green: #22c55e;
+  --sb-red: #ef4444;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--sb-bg);
+  color:var(--sb-text);
+  font-family:'Inter',system-ui,sans-serif;
+  min-height:100vh;min-height:100dvh;
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+}
+.login-card{
+  width:100%;max-width:400px;
+  padding:32px 24px;
+  border-radius:20px;
+  background:var(--sb-surface);
+  border:1px solid var(--sb-border);
+  box-shadow:0 20px 60px rgba(0,0,0,0.4);
+}
+.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:24px;justify-content:center}
+.login-logo img{width:48px;height:48px;border-radius:14px;object-fit:cover}
+.login-logo h1{font-size:22px;font-weight:800;letter-spacing:-0.02em}
+.login-logo h1 span{color:var(--sb-green)}
+.login-subtitle{text-align:center;color:var(--sb-muted);font-size:13px;margin-bottom:24px}
+.login-tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--sb-surface-2);border-radius:10px;padding:3px}
+.login-tab{
+  flex:1;padding:10px;border-radius:8px;
+  font-size:13px;font-weight:600;color:var(--sb-muted);
+  text-align:center;cursor:pointer;transition:all 0.2s;
+  border:none;background:none;font-family:inherit;
+}
+.login-tab.is-active{background:var(--sb-green);color:#000}
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--sb-muted);margin-bottom:6px}
+.form-input{
+  width:100%;padding:12px 14px;border-radius:10px;
+  background:var(--sb-surface-2);border:1px solid var(--sb-border);
+  color:var(--sb-text);font-size:14px;font-family:inherit;
+  outline:none;transition:border-color 0.2s;
+}
+.form-input:focus{border-color:rgba(34,197,94,0.4)}
+.form-input::placeholder{color:var(--sb-muted)}
+.login-btn{
+  width:100%;padding:14px;border-radius:10px;
+  background:var(--sb-green);color:#000;
+  font-size:14px;font-weight:700;font-family:inherit;
+  border:none;cursor:pointer;transition:opacity 0.2s;
+  margin-top:8px;
+}
+.login-btn:hover{opacity:0.9}
+.login-btn:disabled{opacity:0.5;cursor:not-allowed}
+.login-error{
+  margin-top:12px;padding:10px 14px;border-radius:8px;
+  background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);
+  color:var(--sb-red);font-size:12px;text-align:center;
+  display:none;
+}
+.login-error.is-visible{display:block}
+.login-success{
+  margin-top:12px;padding:10px 14px;border-radius:8px;
+  background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);
+  color:var(--sb-green);font-size:12px;text-align:center;
+  display:none;
+}
+.login-success.is-visible{display:block}
+.login-footer{margin-top:20px;text-align:center;font-size:11px;color:var(--sb-muted)}
+</style>
+</head>
+<body>
+
+<div class="login-card">
+  <div class="login-logo">
+    <img src="./delly.png" alt=""/>
+    <h1>Degens <span>MLB</span></h1>
+  </div>
+  <p class="login-subtitle">Sign in to access the prediction board</p>
+
+  <div class="login-tabs">
+    <button class="login-tab is-active" data-tab="login">Sign In</button>
+    <button class="login-tab" data-tab="register">Create Account</button>
+  </div>
+
+  <!-- LOGIN FORM -->
+  <form id="login-form">
+    <div class="form-group">
+      <label class="form-label" for="login-username">Username</label>
+      <input class="form-input" id="login-username" type="text" placeholder="Enter username" autocomplete="username" required/>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="login-password">Password</label>
+      <input class="form-input" id="login-password" type="password" placeholder="Enter password" autocomplete="current-password" required/>
+    </div>
+    <button class="login-btn" type="submit">Sign In</button>
+  </form>
+
+  <!-- REGISTER FORM -->
+  <form id="register-form" hidden>
+    <div class="form-group">
+      <label class="form-label" for="reg-username">Username</label>
+      <input class="form-input" id="reg-username" type="text" placeholder="Choose a username" autocomplete="username" required minlength="3"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="reg-password">Password</label>
+      <input class="form-input" id="reg-password" type="password" placeholder="Choose a password" autocomplete="new-password" required minlength="6"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="reg-password-confirm">Confirm Password</label>
+      <input class="form-input" id="reg-password-confirm" type="password" placeholder="Confirm password" autocomplete="new-password" required/>
+    </div>
+    <button class="login-btn" type="submit">Create Account</button>
+  </form>
+
+  <div class="login-error" id="error-msg"></div>
+  <div class="login-success" id="success-msg"></div>
+
+  <p class="login-footer">Smart picks powered by data</p>
+</div>
+
+<script>
+const tabs = document.querySelectorAll('.login-tab');
+const loginForm = document.getElementById('login-form');
+const registerForm = document.getElementById('register-form');
+const errorEl = document.getElementById('error-msg');
+const successEl = document.getElementById('success-msg');
+
+// Check if already logged in
+if(localStorage.getItem('degens_token')){
+  window.location.href = './';
+}
+
+tabs.forEach(tab => {
+  tab.onclick = () => {
+    tabs.forEach(t => t.classList.remove('is-active'));
+    tab.classList.add('is-active');
+    errorEl.classList.remove('is-visible');
+    successEl.classList.remove('is-visible');
+    if(tab.dataset.tab === 'login'){
+      loginForm.hidden = false;
+      registerForm.hidden = true;
+    } else {
+      loginForm.hidden = true;
+      registerForm.hidden = false;
+    }
+  };
+});
+
+function showError(msg){
+  errorEl.textContent = msg;
+  errorEl.classList.add('is-visible');
+  successEl.classList.remove('is-visible');
+}
+function showSuccess(msg){
+  successEl.textContent = msg;
+  successEl.classList.add('is-visible');
+  errorEl.classList.remove('is-visible');
+}
+
+loginForm.onsubmit = async (e) => {
+  e.preventDefault();
+  const btn = loginForm.querySelector('.login-btn');
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+  try {
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        action: 'login',
+        username: document.getElementById('login-username').value.trim(),
+        password: document.getElementById('login-password').value,
+      })
+    });
+    const data = await res.json();
+    if(!res.ok) { showError(data.error || 'Login failed'); return; }
+    localStorage.setItem('degens_token', data.token);
+    localStorage.setItem('degens_user', data.username);
+    window.location.href = './';
+  } catch(err) {
+    showError('Connection error. Try again.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+  }
+};
+
+registerForm.onsubmit = async (e) => {
+  e.preventDefault();
+  const pw = document.getElementById('reg-password').value;
+  const pw2 = document.getElementById('reg-password-confirm').value;
+  if(pw !== pw2){ showError('Passwords do not match.'); return; }
+  const btn = registerForm.querySelector('.login-btn');
+  btn.disabled = true;
+  btn.textContent = 'Creating account...';
+  try {
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        action: 'register',
+        username: document.getElementById('reg-username').value.trim(),
+        password: pw,
+      })
+    });
+    const data = await res.json();
+    if(!res.ok) { showError(data.error || 'Registration failed'); return; }
+    showSuccess('Account created! You can now sign in.');
+    tabs[0].click();
+  } catch(err) {
+    showError('Connection error. Try again.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Create Account';
+  }
+};
+</script>
+</body>
+</html>

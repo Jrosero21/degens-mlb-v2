@@ -396,6 +396,9 @@ a{color:inherit;text-decoration:none}
   <div class="sb-header-brand">Degens <span>MLB</span></div>
   <span class="sb-header-pill is-live" id="header-time">Updating...</span>
   <span class="sb-header-pill" id="header-record">--</span>
+  <button class="sb-header-pill" id="logout-btn" style="cursor:pointer" title="Sign out">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:-2px"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+  </button>
 </header>
 
 <!-- HERO -->
@@ -466,6 +469,11 @@ a{color:inherit;text-decoration:none}
 </nav>
 
 <script>
+// ─── AUTH CHECK ───
+if(!localStorage.getItem('degens_token')){
+  window.location.href = './login.html';
+}
+
 const DATA_URL = "./data/current-board.json";
 const TEAM_MAP = {ANA:"LAA",AZ:"ARI",CHA:"CWS",CHN:"CHC",KCA:"KC",LAN:"LAD",NYA:"NYY",NYN:"NYM",SDN:"SD",SFN:"SF",SLN:"STL",TBA:"TB",WAS:"WSH"};
 const t = v => TEAM_MAP[v]||v||"--";
@@ -1419,6 +1427,13 @@ document.querySelectorAll(".sb-nav-item").forEach(btn=>{
     if(nav==="board"){state.filter="all";state.day="today";render();window.scrollTo({top:0,behavior:"smooth"})}
   };
 });
+
+// ─── LOGOUT ───
+document.getElementById("logout-btn").onclick = () => {
+  localStorage.removeItem("degens_token");
+  localStorage.removeItem("degens_user");
+  window.location.href = "./login.html";
+};
 
 // ─── MAIN RENDER ───
 function render(){
