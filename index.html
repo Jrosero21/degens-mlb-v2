@@ -1250,8 +1250,40 @@ function generateAIResponse(query){
     return resp;
   }
 
-  // ─── WHAT SHOULD I BET / RECOMMEND / BEST BET ───
-  if(q.includes("what should")||q.includes("recommend")||q.includes("best bet")||q.includes("today")||q.includes("what do you")||q.includes("suggestion")||q.includes("what's good")){
+  // ─── BEST PICK / TOP PICK / #1 (with multi-factor reasoning) ───
+  if(q.includes("best pick")||q.includes("top pick")||q.includes("number one")||q.includes("#1")||q.includes("strongest pick")||(q.includes("best")&&(q.includes("why")||q.includes("pick")))){
+    // Score games on multiple factors
+    const scored = games.map(g=>{
+      let score = 0;
+      const reasons = [];
+      if(g.projected_confidence_pct>=72){score+=3;reasons.push(`high confidence (${fP(g.projected_confidence_pct)})`);}
+      else if(g.projected_confidence_pct>=60){score+=1.5;reasons.push(`moderate confidence (${fP(g.projected_confidence_pct)})`);}
+      if(g.kelly_edge>=0.15){score+=3;reasons.push(`strong edge (+${(g.kelly_edge*100).toFixed(0)}%) over the odds`);}
+      else if(g.kelly_edge>=0.05){score+=1.5;reasons.push(`decent edge (+${(g.kelly_edge*100).toFixed(0)}%)`);}
+      if(g.historical_bucket_accuracy_pct>=65){score+=2;reasons.push(`excellent track record (${fP(g.historical_bucket_accuracy_pct)} in ${g.historical_bucket_games} similar games)`);}
+      else if(g.historical_bucket_accuracy_pct>=58){score+=1;reasons.push(`solid track record (${fP(g.historical_bucket_accuracy_pct)})`);}
+      if(Math.abs(g.projected_score_diff)>=1.5){score+=2;reasons.push(`wide projected margin (${fSig(g.projected_score_diff,1)} runs)`);}
+      else if(Math.abs(g.projected_score_diff)>=0.75){score+=1;reasons.push(`decent margin (${fSig(g.projected_score_diff,1)} runs)`);}
+      if(g.model_vs_market==="AGREE"){score+=0.5;reasons.push("model and Vegas agree on the favorite");}
+      if(Number(g.is_go_play)===1){score+=1;reasons.push("flagged as Best Bet");}
+      return {...g, _score:score, _reasons:reasons};
+    }).sort((a,b)=>b._score-a._score);
+    const top = scored[0];
+    const runner = scored[1];
+    const pickedOdds = top.projected_winner_side==="home"?top.vegas_moneyline_home:top.vegas_moneyline_away;
+    let resp = `<strong>Top Pick Today: ${t(top.projected_winner)} (${fMl(pickedOdds)})</strong><br>`;
+    resp+=`${t(top.away_team)} @ ${t(top.home_team)}<br><br>`;
+    resp+=`<strong>Why this is #1:</strong><br>`;
+    top._reasons.forEach(r=>{ resp+=`-- ${r}<br>`; });
+    resp+=`<br>Projected: ${t(top.away_team)} ${fN(top.projected_away_runs)} - ${t(top.home_team)} ${fN(top.projected_home_runs)}<br>`;
+    if(top.has_kelly_edge) resp+=`Kelly suggests: ${fKelly(top.kelly_half_pct)} of bankroll<br>`;
+    resp+=`<br><strong>Runner up:</strong> ${t(runner.projected_winner)} in ${t(runner.away_team)} @ ${t(runner.home_team)} (${fP(runner.projected_confidence_pct)})`;
+    if(runner._reasons.length) resp+=` -- ${runner._reasons.slice(0,2).join(", ")}`;
+    return resp;
+  }
+
+  // ─── WHAT SHOULD I BET / RECOMMEND / BOARD SUMMARY ───
+  if(q.includes("what should")||q.includes("recommend")||q.includes("best bet")||q.includes("what do you")||q.includes("suggestion")||q.includes("what's good")||q.match(/\btoday\b/)){
     const bestBets = games.filter(g=>Number(g.is_go_play)===1).sort((a,b)=>(b.projected_confidence_pct||0)-(a.projected_confidence_pct||0));
     const topConf = [...games].sort((a,b)=>(b.projected_confidence_pct||0)-(a.projected_confidence_pct||0))[0];
     let resp = "<strong>Today's Board Summary:</strong><br><br>";
