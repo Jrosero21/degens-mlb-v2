@@ -1632,6 +1632,7 @@ function buildBoardContext(){
     ctx+=`VegasTotal:${fN(g.vegas_total_line)} | `;
     ctx+=`Track:${fP(g.historical_bucket_accuracy_pct)} in ${g.historical_bucket_games||"--"} games | `;
     ctx+=`Tier:${g.edge_tier_label||"--"} | vsVegas:${g.model_vs_market} | `;
+    ctx+=`Kelly:edge=${g.kelly_edge!=null?(g.kelly_edge*100).toFixed(1)+"%":"none"} full=${g.kelly_full_pct!=null?g.kelly_full_pct+"%":"none"} half=${g.kelly_half_pct!=null?g.kelly_half_pct+"%":"none"} hasEdge=${g.has_kelly_edge} | `;
     ctx+=`Flags:${Number(g.is_go_play)===1?"BEST_BET ":""}${Number(g.is_stay_away)===1?"PASS ":""}${g.moneyline_roi_play?"ML_HOT ":""}${g.runline_roi_play?"RL_HOT ":""}`;
     ctx+=`\n`;
   });
