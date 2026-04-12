@@ -874,20 +874,32 @@ function renderBoard(games,recentGames){
     }
   });
 
-  // Split into upcoming vs started
+  // Split into upcoming, live, finished -- each sorted earliest to latest
   const now = new Date();
-  const upcoming = filtered.filter(g=>!g.commence_time_utc || new Date(g.commence_time_utc) > now);
-  const started = filtered.filter(g=>g.commence_time_utc && new Date(g.commence_time_utc) <= now);
+  const byTime = (a,b) => new Date(a.commence_time_utc||0) - new Date(b.commence_time_utc||0);
+
+  const upcoming = filtered.filter(g=>!g.commence_time_utc || new Date(g.commence_time_utc) > now).sort(byTime);
+  const startedAll = filtered.filter(g=>g.commence_time_utc && new Date(g.commence_time_utc) <= now);
+  const live = startedAll.filter(g=>{ const key=matchScoreKey(g); return !liveScores[key]?.completed; }).sort(byTime);
+  const finished = startedAll.filter(g=>{ const key=matchScoreKey(g); return liveScores[key]?.completed; }).sort(byTime);
+  // If no live scores loaded yet, treat all started as live
+  const hasScoreData = Object.keys(liveScores).length > 0;
+  const liveDisplay = hasScoreData ? live : startedAll.sort(byTime);
+  const finishedDisplay = hasScoreData ? finished : [];
 
   const board = document.getElementById("board");
   if(!filtered.length){
     board.innerHTML='<div class="sb-empty">No games match this filter.</div>';
   } else {
     let html = upcoming.map(g=>buildCard(g)).join("");
-    if(started.length && upcoming.length){
-      html+=`<div class="sb-started-divider">Started / In Progress (${started.length})</div>`;
+    if(liveDisplay.length){
+      html+=`<div class="sb-started-divider">Live (${liveDisplay.length})</div>`;
+      html+=liveDisplay.map(g=>buildCard(g)).join("");
     }
-    html+=started.map(g=>buildCard(g)).join("");
+    if(finishedDisplay.length){
+      html+=`<div class="sb-started-divider">Finished (${finishedDisplay.length})</div>`;
+      html+=finishedDisplay.map(g=>buildCard(g)).join("");
+    }
     board.innerHTML=html;
   }
 }
