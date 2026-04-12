@@ -1881,7 +1881,21 @@ function updateLiveScoreCards(){
 let liveInterval = null;
 function startLivePolling(){
   fetchLiveScores(); // initial fetch
-  liveInterval = setInterval(fetchLiveScores, 120000); // every 2 minutes
+  liveInterval = setInterval(()=>{
+    // Stop polling if all games are completed or no live scores left
+    const now = new Date();
+    const started = state.data?.games?.filter(g=>g.commence_time_utc && new Date(g.commence_time_utc)<=now)||[];
+    const allDone = started.length>0 && started.every(g=>{
+      const key = matchScoreKey(g);
+      return liveScores[key]?.completed;
+    });
+    if(allDone){
+      clearInterval(liveInterval);
+      console.log("All games finished — live polling stopped.");
+      return;
+    }
+    fetchLiveScores();
+  }, 60000); // every 1 minute
 }
 
 // ─── LOAD ───
