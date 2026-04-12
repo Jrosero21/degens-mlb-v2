@@ -1156,6 +1156,17 @@ function generateAIResponse(query){
 
   if(!games.length) return "No games loaded yet. The board might still be refreshing.";
 
+  // Split games by status -- actionable = not yet started
+  const now = new Date();
+  const actionable = games.filter(g => !g.commence_time_utc || new Date(g.commence_time_utc) > now);
+  const started = games.filter(g => g.commence_time_utc && new Date(g.commence_time_utc) <= now);
+  const liveGames = started.filter(g => { const key=matchScoreKey(g); return !liveScores[key]?.completed; });
+  const finishedGames = started.filter(g => { const key=matchScoreKey(g); return liveScores[key]?.completed; });
+
+  // Use actionable games for picks/parlays/sizing, all games for analysis/breakdowns
+  const isAskingAboutPast = q.includes("finished")||q.includes("completed")||q.includes("result")||q.includes("how did")||q.includes("earlier");
+  const pickPool = isAskingAboutPast ? games : actionable;
+
   // ─── TEAM-SPECIFIC QUESTIONS (only when clearly asking about a specific team) ───
   const teamGame = findTeamGame(q, games);
   const isTeamQuestion = teamGame && (q.includes("break")||q.includes("tell me about")||q.includes("what about")||q.includes("how about")||q.includes("analyze")||q.includes("analysis")||q.includes("think about")||q.match(/\b(game|matchup|match)\b/));
@@ -1168,16 +1179,17 @@ function generateAIResponse(query){
     // Check if they asked for a specific number of legs
     const legMatch = q.match(/(\d+)\s*(?:leg|team|pick|game)/);
     const legs = legMatch ? parseInt(legMatch[1]) : 3;
-    return buildParlayAnalysis(games, Math.min(Math.max(legs, 2), 6));
+    if(!pickPool.length) return "All games have already started or finished -- no upcoming games to build a parlay from.";
+    return buildParlayAnalysis(pickPool, Math.min(Math.max(legs, 2), 6));
   }
 
   // ─── BANKROLL / BET SIZE / KELLY SIZING ───
   const bankrollMatch = q.match(/\$\s*([\d,]+)/)||q.match(/([\d,]+)\s*(?:dollar|bankroll|budget|bank)/);
   if(bankrollMatch || q.includes("bankroll")||q.includes("bet size")||q.includes("how much")||q.includes("kelly")||q.includes("unit")||q.includes("wager")||q.includes("sizing")||q.includes("allocat")) {
     const bankroll = bankrollMatch ? parseFloat(bankrollMatch[1].replace(/,/g,"")) : 500;
-    const withEdge = games.filter(g=>g.has_kelly_edge && g.kelly_full_pct > 0).sort((a,b)=>(b.kelly_full_pct||0)-(a.kelly_full_pct||0));
+    const withEdge = pickPool.filter(g=>g.has_kelly_edge && g.kelly_full_pct > 0).sort((a,b)=>(b.kelly_full_pct||0)-(a.kelly_full_pct||0));
 
-    if(!withEdge.length) return `With a $${bankroll.toLocaleString()} bankroll, I don't see any games today where the model has a positive edge over the odds. That means Kelly says sit this slate out -- no bets.`;
+    if(!withEdge.length) return pickPool.length ? `No upcoming games with positive Kelly edge right now.` : `All games have already started or finished -- no upcoming games to size bets for.`;
 
     // Detect which Kelly fraction the user wants
     let kellyFraction = 0.5; // default half Kelly
@@ -1241,8 +1253,9 @@ function generateAIResponse(query){
 
   // ─── EDGE / VALUE QUESTIONS ───
   if(q.includes("edge")||q.includes("value")||q.includes("strongest")||q.includes("best value")||q.includes("biggest")){
-    const sorted = [...games].sort((a,b)=>Math.abs(b.projected_score_diff||0)-Math.abs(a.projected_score_diff||0)).slice(0,3);
-    let resp = "<strong>Games with the Biggest Edge Today:</strong><br><br>";
+    const sorted = [...pickPool].sort((a,b)=>Math.abs(b.projected_score_diff||0)-Math.abs(a.projected_score_diff||0)).slice(0,3);
+    if(!sorted.length) return "All games have started -- no upcoming edges to highlight.";
+    let resp = "<strong>Biggest Edge in Upcoming Games:</strong><br><br>";
     sorted.forEach((g,i)=>{
       const isBest = Number(g.is_go_play)===1;
       const isDisagree = g.model_vs_market==="DISAGREE";
@@ -1260,9 +1273,10 @@ function generateAIResponse(query){
 
   // ─── SAFE / CONFIDENT / SURE THING ───
   if(q.includes("safe")||q.includes("confident")||q.includes("sure")||q.includes("lock")||q.includes("reliable")||q.includes("guarantee")){
-    const sorted = [...games].sort((a,b)=>(b.projected_confidence_pct||0)-(a.projected_confidence_pct||0));
+    const sorted = [...pickPool].sort((a,b)=>(b.projected_confidence_pct||0)-(a.projected_confidence_pct||0));
+    if(!sorted.length) return "All games have started -- no upcoming picks to recommend.";
     const top3 = sorted.slice(0,3);
-    let resp = "<strong>Most Confident Picks Today:</strong><br><br>";
+    let resp = "<strong>Most Confident Upcoming Picks:</strong><br><br>";
     top3.forEach((g,i)=>{
       resp+=`<strong>${i+1}. ${t(g.projected_winner)}</strong> (${t(g.away_team)} @ ${t(g.home_team)})<br>`;
       resp+=`Confidence: ${fP(g.projected_confidence_pct)} -- ${fMl(g.projected_winner_side==="home"?g.vegas_moneyline_home:g.vegas_moneyline_away)}<br>`;
@@ -1275,7 +1289,7 @@ function generateAIResponse(query){
   // ─── SPREAD / RUNLINE ───
   if(q.includes("spread")||q.includes("runline")||q.includes("cover")||q.includes("+1.5")||q.includes("-1.5")){
     const rlCard = featured.find(f=>f.card_type==="go_play_runline");
-    const spreadGames = [...games].filter(g=>g.projected_runline_pick).sort((a,b)=>(b.projected_runline_confidence_pct||0)-(a.projected_runline_confidence_pct||0));
+    const spreadGames = [...pickPool].filter(g=>g.projected_runline_pick).sort((a,b)=>(b.projected_runline_confidence_pct||0)-(a.projected_runline_confidence_pct||0));
     let resp = "<strong>Spread Analysis:</strong><br><br>";
     if (rlCard) {
       const matchGame = games.find(g=>g.gamePk===rlCard.gamePk);
@@ -1299,8 +1313,8 @@ function generateAIResponse(query){
 
   // ─── AGAINST VEGAS / CONTRARIAN / FADE ───
   if(q.includes("against")||q.includes("disagree")||q.includes("fade")||q.includes("contrarian")||q.includes("upset")||q.includes("underdog")){
-    const disagrees = games.filter(g=>g.model_vs_market==="DISAGREE");
-    if(!disagrees.length) return "Our model agrees with Vegas on every game today. No contrarian plays to highlight. That's actually pretty rare -- usually there are at least 1-2 disagreements.";
+    const disagrees = pickPool.filter(g=>g.model_vs_market==="DISAGREE");
+    if(!disagrees.length) return pickPool.length?"Our model agrees with Vegas on every upcoming game. No contrarian plays.":"All games have started -- no upcoming contrarian plays.";
     let resp = `<strong>Against the Line -- ${disagrees.length} Contrarian Pick${disagrees.length>1?"s":""}:</strong><br><br>`;
     disagrees.forEach(g=>{
       const conf = g.projected_confidence_pct;
@@ -1361,8 +1375,8 @@ function generateAIResponse(query){
 
   // ─── BEST PICK / TOP PICK / #1 (with multi-factor reasoning) ───
   if(q.includes("best pick")||q.includes("top pick")||q.includes("number one")||q.includes("#1")||q.includes("strongest pick")||(q.includes("best")&&(q.includes("why")||q.includes("pick")))){
-    // Score games on multiple factors
-    const scored = games.map(g=>{
+    if(!pickPool.length) return "All games have started or finished -- no upcoming picks to recommend.";
+    const scored = pickPool.map(g=>{
       let score = 0;
       const reasons = [];
       if(g.projected_confidence_pct>=72){score+=3;reasons.push(`high confidence (${fP(g.projected_confidence_pct)})`);}
@@ -1393,12 +1407,12 @@ function generateAIResponse(query){
 
   // ─── WHAT SHOULD I BET / RECOMMEND / BOARD SUMMARY ───
   if(q.includes("what should")||q.includes("recommend")||q.includes("best bet")||q.includes("what do you")||q.includes("suggestion")||q.includes("what's good")||q.match(/\btoday\b/)){
-    const bestBets = games.filter(g=>Number(g.is_go_play)===1).sort((a,b)=>(b.projected_confidence_pct||0)-(a.projected_confidence_pct||0));
-    const topConf = [...games].sort((a,b)=>(b.projected_confidence_pct||0)-(a.projected_confidence_pct||0))[0];
+    const bestBets = pickPool.filter(g=>Number(g.is_go_play)===1).sort((a,b)=>(b.projected_confidence_pct||0)-(a.projected_confidence_pct||0));
+    const topConf = [...pickPool].sort((a,b)=>(b.projected_confidence_pct||0)-(a.projected_confidence_pct||0))[0];
     let resp = "<strong>Today's Board Summary:</strong><br><br>";
-    resp+=`${games.length} games on the board. `;
-    resp+=`${bestBets.length} Best Bet${bestBets.length!==1?"s":""}. `;
-    const disagreeCount = games.filter(g=>g.model_vs_market==="DISAGREE").length;
+    resp+=`${pickPool.length} upcoming game${pickPool.length!==1?"s":""}${started.length?` (${liveGames.length} live, ${finishedGames.length} finished)`:""} on the board. `;
+    resp+=`${bestBets.length} Best Bet${bestBets.length!==1?"s":""} still upcoming. `;
+    const disagreeCount = pickPool.filter(g=>g.model_vs_market==="DISAGREE").length;
     if(disagreeCount) resp+=`${disagreeCount} game${disagreeCount!==1?"s":""} where we disagree with Vegas. `;
     resp+=`<br><br>`;
     if(bestBets.length){
@@ -1417,8 +1431,8 @@ function generateAIResponse(query){
 
   // ─── CLOSE GAMES / TOSS UPS ───
   if(q.includes("close")||q.includes("toss up")||q.includes("coin flip")||q.includes("avoid")||q.includes("skip")||q.includes("stay away")||q.includes("pass")){
-    const closeGames = [...games].filter(g=>(g.projected_confidence_pct||0)<58).sort((a,b)=>(a.projected_confidence_pct||0)-(b.projected_confidence_pct||0));
-    const passGames = games.filter(g=>Number(g.is_stay_away)===1);
+    const closeGames = [...pickPool].filter(g=>(g.projected_confidence_pct||0)<58).sort((a,b)=>(a.projected_confidence_pct||0)-(b.projected_confidence_pct||0));
+    const passGames = pickPool.filter(g=>Number(g.is_stay_away)===1);
     let resp = "<strong>Games to Be Careful With:</strong><br><br>";
     if(passGames.length){
       resp+=`<strong>Marked as Pass (${passGames.length}):</strong><br>`;
@@ -1459,11 +1473,11 @@ function generateAIResponse(query){
 
   // ─── FAVORITES / DOGS / PLUS MONEY / MINUS MONEY ───
   if(q.includes("underdog")||q.includes("dog")||q.includes("plus money")||q.includes("plus odds")||q.match(/\bdog[s]?\b/)){
-    const dogs = games.filter(g=>{
+    const dogs = pickPool.filter(g=>{
       const ml = g.projected_winner_side==="home"?g.vegas_moneyline_home:g.vegas_moneyline_away;
       return ml!=null && ml > 0;
     }).sort((a,b)=>(b.projected_confidence_pct||0)-(a.projected_confidence_pct||0));
-    if(!dogs.length) return "No underdog picks on the board today -- the model favors the chalk across the slate.";
+    if(!dogs.length) return pickPool.length?"No underdog picks in upcoming games -- the model favors the chalk.":"All games have started -- no upcoming underdog plays.";
     let resp = `<strong>Underdog Picks (Plus Money):</strong><br><br>`;
     dogs.forEach(g=>{
       const ml = g.projected_winner_side==="home"?g.vegas_moneyline_home:g.vegas_moneyline_away;
@@ -1485,7 +1499,7 @@ function generateAIResponse(query){
 
   // ─── FAVORITES / CHALK / HEAVY FAVORITES ───
   if(q.includes("favorite")||q.includes("chalk")||q.includes("heavy")||q.includes("minus money")){
-    const favs = games.filter(g=>{
+    const favs = pickPool.filter(g=>{
       const ml = g.projected_winner_side==="home"?g.vegas_moneyline_home:g.vegas_moneyline_away;
       return ml!=null && ml < -130;
     }).sort((a,b)=>(b.projected_confidence_pct||0)-(a.projected_confidence_pct||0));
@@ -1624,21 +1638,25 @@ function generateAIResponse(query){
 
   // ─── GENERAL / CONVERSATIONAL FALLBACK ───
   // Instead of a help menu, actually analyze the board and give a real take
-  const scored = games.map(g=>{
+  const pool = pickPool.length ? pickPool : games;
+  const scored = pool.map(g=>{
     let score = (g.projected_confidence_pct||0)/10 + (g.kelly_edge||0)*50 + (g.historical_bucket_accuracy_pct||50)/20;
     if(Number(g.is_go_play)===1) score+=5;
     return {...g, _score:score};
   }).sort((a,b)=>b._score-a._score);
-  const bestBets = games.filter(g=>Number(g.is_go_play)===1);
-  const disagrees = games.filter(g=>g.model_vs_market==="DISAGREE");
-  const withEdge = games.filter(g=>g.has_kelly_edge);
+  const bestBets = pickPool.filter(g=>Number(g.is_go_play)===1);
+  const disagrees = pickPool.filter(g=>g.model_vs_market==="DISAGREE");
+  const withEdge = pickPool.filter(g=>g.has_kelly_edge);
   const topGame = scored[0];
   const pickedOdds = topGame?topGame.projected_winner_side==="home"?topGame.vegas_moneyline_home:topGame.vegas_moneyline_away:null;
 
   let resp = `<strong>Here's my read on today's board:</strong><br><br>`;
-  resp+=`${games.length} games. `;
-  if(bestBets.length) resp+=`<strong>${bestBets.length} Best Bet${bestBets.length!==1?"s":""}</strong>. `;
-  resp+=`${withEdge.length} games have positive edge over the odds. ${disagrees.length} where we disagree with Vegas.<br><br>`;
+  resp+=`${pickPool.length} upcoming game${pickPool.length!==1?"s":""}`;
+  if(started.length) resp+=` (${liveGames.length} live, ${finishedGames.length} finished)`;
+  resp+=`. `;
+  if(bestBets.length) resp+=`<strong>${bestBets.length} Best Bet${bestBets.length!==1?"s":""}</strong> still upcoming. `;
+  else if(!pickPool.length) resp+=`All games have started or finished. `;
+  resp+=`${withEdge.length} upcoming with positive edge. ${disagrees.length} where we disagree with Vegas.<br><br>`;
 
   if(topGame){
     resp+=`<strong>My top play:</strong> ${t(topGame.projected_winner)} (${fMl(pickedOdds)}) in ${t(topGame.away_team)} @ ${t(topGame.home_team)} -- `;
@@ -1680,9 +1698,15 @@ function buildBoardContext(){
   });
 
   ctx+=`\nALL GAMES:\n`;
+  const now = new Date();
   games.forEach(g=>{
+    const isStarted = g.commence_time_utc && new Date(g.commence_time_utc) <= now;
+    const key = matchScoreKey(g);
+    const score = liveScores[key];
+    const status = score?.completed ? "FINISHED" : isStarted ? "LIVE" : "UPCOMING";
+    const liveScore = score ? `${score.awayScore}-${score.homeScore}` : "";
     const pickedOdds = g.projected_winner_side==="home"?g.vegas_moneyline_home:g.vegas_moneyline_away;
-    ctx+=`${t(g.away_team)}@${t(g.home_team)} | Pick:${t(g.projected_winner)} conf=${g.projected_confidence_pct}% | `;
+    ctx+=`[${status}${liveScore?" "+liveScore:""}] ${t(g.away_team)}@${t(g.home_team)} | Pick:${t(g.projected_winner)} conf=${g.projected_confidence_pct}% | `;
     ctx+=`Score:${fN(g.projected_away_runs)}-${fN(g.projected_home_runs)} margin=${fSig(g.projected_score_diff,2)} | `;
     ctx+=`ML:${fMl(g.vegas_moneyline_away)}/${fMl(g.vegas_moneyline_home)} | `;
     ctx+=`Spread:${tText(g.projected_runline_pick)||"--"} conf=${fP(g.projected_runline_confidence_pct)} edge=${fSig(g.projected_runline_edge,2)} | `;
