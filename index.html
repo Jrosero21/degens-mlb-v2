@@ -1316,25 +1316,203 @@ function generateAIResponse(query){
     return resp;
   }
 
+  // ─── FAVORITES / DOGS / PLUS MONEY / MINUS MONEY ───
+  if(q.includes("underdog")||q.includes("dog")||q.includes("plus money")||q.includes("plus odds")||q.match(/\bdog[s]?\b/)){
+    const dogs = games.filter(g=>{
+      const ml = g.projected_winner_side==="home"?g.vegas_moneyline_home:g.vegas_moneyline_away;
+      return ml!=null && ml > 0;
+    }).sort((a,b)=>(b.projected_confidence_pct||0)-(a.projected_confidence_pct||0));
+    if(!dogs.length) return "No underdog picks on the board today -- the model favors the chalk across the slate.";
+    let resp = `<strong>Underdog Picks (Plus Money):</strong><br><br>`;
+    dogs.forEach(g=>{
+      const ml = g.projected_winner_side==="home"?g.vegas_moneyline_home:g.vegas_moneyline_away;
+      resp+=`<strong>${t(g.projected_winner)} (${fMl(ml)})</strong> -- ${t(g.away_team)} @ ${t(g.home_team)}<br>`;
+      resp+=`Confidence: ${fP(g.projected_confidence_pct)} | Margin: ${fSig(g.projected_score_diff,2)} | Edge over odds: ${g.has_kelly_edge?"+"+((g.kelly_edge*100).toFixed(1))+"%":"none"}<br>`;
+      // Why this dog?
+      const reasons = [];
+      if(g.projected_confidence_pct>=60) reasons.push("model is fairly confident despite the plus odds");
+      if(g.kelly_edge>=0.1) reasons.push(`significant ${((g.kelly_edge*100).toFixed(0))}% edge over implied probability`);
+      if(g.historical_bucket_accuracy_pct>=60) reasons.push(`${fP(g.historical_bucket_accuracy_pct)} track record in similar spots`);
+      if(Math.abs(g.projected_score_diff)>=1) reasons.push(`projected ${fSig(g.projected_score_diff,1)} run margin`);
+      if(g.model_vs_market==="DISAGREE") reasons.push("model disagrees with Vegas on the favorite");
+      if(reasons.length) resp+=`<em>Why: ${reasons.join("; ")}</em><br>`;
+      resp+=`<br>`;
+    });
+    resp+=`<em>Underdogs with plus money pay more per dollar risked. The model picks dogs when it sees the line is off -- but these are inherently higher variance.</em>`;
+    return resp;
+  }
+
+  // ─── FAVORITES / CHALK / HEAVY FAVORITES ───
+  if(q.includes("favorite")||q.includes("chalk")||q.includes("heavy")||q.includes("minus money")){
+    const favs = games.filter(g=>{
+      const ml = g.projected_winner_side==="home"?g.vegas_moneyline_home:g.vegas_moneyline_away;
+      return ml!=null && ml < -130;
+    }).sort((a,b)=>(b.projected_confidence_pct||0)-(a.projected_confidence_pct||0));
+    let resp = `<strong>Favorite Plays (Heavy Chalk):</strong><br><br>`;
+    if(!favs.length){ return "No heavy favorites in the model's picks today."; }
+    favs.forEach(g=>{
+      const ml = g.projected_winner_side==="home"?g.vegas_moneyline_home:g.vegas_moneyline_away;
+      const juiceCost = Math.abs(ml) - 100;
+      resp+=`<strong>${t(g.projected_winner)} (${fMl(ml)})</strong> -- ${t(g.away_team)} @ ${t(g.home_team)}<br>`;
+      resp+=`Confidence: ${fP(g.projected_confidence_pct)} | Margin: ${fSig(g.projected_score_diff,2)} | You risk $${Math.abs(ml)} to win $100<br>`;
+      // Is the juice worth it?
+      if(g.kelly_edge>=0.05) resp+=`<em>The juice looks worth it here -- model sees +${((g.kelly_edge*100).toFixed(1))}% edge even after the vig.</em><br>`;
+      else if(g.kelly_edge>0) resp+=`<em>Thin edge at this price. The model likes the pick but the value is marginal at ${fMl(ml)}.</em><br>`;
+      else resp+=`<em>No Kelly edge at this price -- the vig eats the model's advantage. You're paying too much.</em><br>`;
+      resp+=`<br>`;
+    });
+    return resp;
+  }
+
+  // ─── COMPARE TWO GAMES / WHICH IS BETTER ───
+  if((q.includes("which")||q.includes("compare")||q.includes("better")||q.includes("or")) && teamGame){
+    // Try to find a second team
+    const firstTeam = teamGame;
+    const qWithoutFirst = q.replace(new RegExp(`\\b(${t(firstTeam.away_team)}|${t(firstTeam.home_team)}|${firstTeam.away_team}|${firstTeam.home_team})\\b`,"gi"),"");
+    const secondTeam = findTeamGame(qWithoutFirst, games.filter(g=>g.gamePk!==firstTeam.gamePk));
+    if(secondTeam){
+      const a = firstTeam, b = secondTeam;
+      let resp = `<strong>Comparison: ${t(a.away_team)}@${t(a.home_team)} vs ${t(b.away_team)}@${t(b.home_team)}</strong><br><br>`;
+      resp+=`<table style="width:100%;font-size:12px;border-collapse:collapse">`;
+      const rows = [
+        ["Pick", t(a.projected_winner), t(b.projected_winner)],
+        ["Confidence", fP(a.projected_confidence_pct), fP(b.projected_confidence_pct)],
+        ["Margin", fSig(a.projected_score_diff,2), fSig(b.projected_score_diff,2)],
+        ["Edge over odds", a.has_kelly_edge?"+"+((a.kelly_edge*100).toFixed(1))+"%":"none", b.has_kelly_edge?"+"+((b.kelly_edge*100).toFixed(1))+"%":"none"],
+        ["Track record", fP(a.historical_bucket_accuracy_pct), fP(b.historical_bucket_accuracy_pct)],
+        ["Odds", fMl(a.projected_winner_side==="home"?a.vegas_moneyline_home:a.vegas_moneyline_away), fMl(b.projected_winner_side==="home"?b.vegas_moneyline_home:b.vegas_moneyline_away)],
+        ["Half Kelly", fKelly(a.kelly_half_pct), fKelly(b.kelly_half_pct)],
+      ];
+      rows.forEach(([label,va,vb])=>{
+        resp+=`<tr><td style="padding:4px 6px;color:var(--sb-muted)">${label}</td><td style="padding:4px 6px;font-weight:600">${va}</td><td style="padding:4px 6px;font-weight:600">${vb}</td></tr>`;
+      });
+      resp+=`</table><br>`;
+      // Verdict
+      const aScore = (a.projected_confidence_pct||0) + (a.kelly_edge||0)*100 + (a.historical_bucket_accuracy_pct||0)/10;
+      const bScore = (b.projected_confidence_pct||0) + (b.kelly_edge||0)*100 + (b.historical_bucket_accuracy_pct||0)/10;
+      const winner = aScore>bScore?a:b;
+      const loser = aScore>bScore?b:a;
+      resp+=`<strong>Verdict:</strong> I'd lean <strong>${t(winner.away_team)}@${t(winner.home_team)}</strong>. `;
+      const reasons = [];
+      if((winner.projected_confidence_pct||0)>(loser.projected_confidence_pct||0)) reasons.push("higher confidence");
+      if((winner.kelly_edge||0)>(loser.kelly_edge||0)) reasons.push("better edge over the odds");
+      if((winner.historical_bucket_accuracy_pct||0)>(loser.historical_bucket_accuracy_pct||0)) reasons.push("stronger track record");
+      resp+=reasons.length?`${reasons.join(", ")}.`:"Slightly better composite profile.";
+      return resp;
+    }
+  }
+
+  // ─── GENERAL CALCULATIONS & WHAT-IF SCENARIOS ───
+  if(q.includes("if i")||q.includes("what if")||q.includes("how much")||q.includes("would i")||q.includes("profit")||q.includes("return")||q.includes("roi")||q.includes("win rate")){
+    // Calculate aggregate stats
+    const withEdge = games.filter(g=>g.has_kelly_edge);
+    const avgConf = games.reduce((s,g)=>s+(g.projected_confidence_pct||0),0)/games.length;
+    const avgEdge = withEdge.length?withEdge.reduce((s,g)=>s+(g.kelly_edge||0),0)/withEdge.length:0;
+    const bestBets = games.filter(g=>Number(g.is_go_play)===1);
+
+    let resp = `<strong>Board Analysis:</strong><br><br>`;
+    resp+=`<strong>${games.length} games</strong> today. ${withEdge.length} have positive Kelly edge, ${games.length-withEdge.length} don't.<br>`;
+    resp+=`Average confidence: ${fP(avgConf)}<br>`;
+    resp+=`Average edge (on games with edge): +${(avgEdge*100).toFixed(1)}%<br><br>`;
+
+    if(q.includes("flat")||q.includes("every game")||q.includes("all game")){
+      const flatBet = 10;
+      let totalRisked = 0, totalPotential = 0;
+      games.forEach(g=>{
+        const ml = g.projected_winner_side==="home"?g.vegas_moneyline_home:g.vegas_moneyline_away;
+        if(ml==null) return;
+        totalRisked += flatBet;
+        const potWin = ml>0?flatBet*ml/100:flatBet*100/Math.abs(ml);
+        totalPotential += potWin;
+      });
+      resp+=`If you flat-bet $${flatBet} on every pick today:<br>`;
+      resp+=`Total risked: <strong>$${totalRisked}</strong><br>`;
+      resp+=`If ALL win: +$${Math.round(totalPotential)} profit<br>`;
+      resp+=`If model hits at its season rate (${fP(accuracy?.lanes?.moneyline?.accuracyPct)}): roughly +$${Math.round(totalPotential*(accuracy?.lanes?.moneyline?.accuracyPct||55)/100 - totalRisked*(1-(accuracy?.lanes?.moneyline?.accuracyPct||55)/100))} expected<br><br>`;
+      resp+=`<em>Flat betting ignores edge sizing. Kelly criterion allocates more to your best edges and less to marginal ones -- usually better long-term.</em>`;
+    } else {
+      resp+=`${bestBets.length} game${bestBets.length!==1?"s":""} flagged as Best Bets.<br>`;
+      if(bestBets.length){
+        resp+=`Best Bets average confidence: ${fP(bestBets.reduce((s,g)=>s+(g.projected_confidence_pct||0),0)/bestBets.length)}<br>`;
+        resp+=`Best Bets average edge: +${(bestBets.reduce((s,g)=>s+(g.kelly_edge||0),0)/bestBets.length*100).toFixed(1)}%<br>`;
+      }
+      resp+=`<br>The model's season moneyline rate is ${fP(accuracy?.lanes?.moneyline?.accuracyPct)} over ${accuracy?.lanes?.moneyline?.gradedGames} games. `;
+      resp+=`That's ${(accuracy?.lanes?.moneyline?.accuracyPct||0)>52.4?"above":"below"} the ~52.4% break-even threshold for standard -110 juice.`;
+    }
+    return resp;
+  }
+
+  // ─── BEST PICK / TOP PICK / #1 (with multi-factor reasoning) ───
+  if(q.includes("best")||q.includes("top pick")||q.includes("number one")||q.includes("#1")||q.includes("strongest pick")){
+    // Score games on multiple factors, not just one
+    const scored = games.map(g=>{
+      let score = 0;
+      const reasons = [];
+      if(g.projected_confidence_pct>=72){score+=3;reasons.push(`high confidence (${fP(g.projected_confidence_pct)})`);}
+      else if(g.projected_confidence_pct>=60){score+=1.5;reasons.push(`moderate confidence (${fP(g.projected_confidence_pct)})`);}
+      if(g.kelly_edge>=0.15){score+=3;reasons.push(`strong edge (+${(g.kelly_edge*100).toFixed(0)}%) over the odds`);}
+      else if(g.kelly_edge>=0.05){score+=1.5;reasons.push(`decent edge (+${(g.kelly_edge*100).toFixed(0)}%)`);}
+      if(g.historical_bucket_accuracy_pct>=65){score+=2;reasons.push(`excellent track record (${fP(g.historical_bucket_accuracy_pct)} in ${g.historical_bucket_games} similar games)`);}
+      else if(g.historical_bucket_accuracy_pct>=58){score+=1;reasons.push(`solid track record (${fP(g.historical_bucket_accuracy_pct)})`);}
+      if(Math.abs(g.projected_score_diff)>=1.5){score+=2;reasons.push(`wide projected margin (${fSig(g.projected_score_diff,1)} runs)`);}
+      else if(Math.abs(g.projected_score_diff)>=0.75){score+=1;reasons.push(`decent margin (${fSig(g.projected_score_diff,1)} runs)`);}
+      if(g.model_vs_market==="AGREE"){score+=0.5;reasons.push("model and Vegas agree on the favorite");}
+      if(Number(g.is_go_play)===1){score+=1;reasons.push("flagged as Best Bet");}
+      return {...g, _score:score, _reasons:reasons};
+    }).sort((a,b)=>b._score-a._score);
+
+    const top = scored[0];
+    const runner = scored[1];
+    const pickedOdds = top.projected_winner_side==="home"?top.vegas_moneyline_home:top.vegas_moneyline_away;
+
+    let resp = `<strong>Top Pick Today: ${t(top.projected_winner)} (${fMl(pickedOdds)})</strong><br>`;
+    resp+=`${t(top.away_team)} @ ${t(top.home_team)}<br><br>`;
+    resp+=`<strong>Why this is #1:</strong><br>`;
+    top._reasons.forEach(r=>{ resp+=`-- ${r}<br>`; });
+    resp+=`<br>Projected: ${t(top.away_team)} ${fN(top.projected_away_runs)} - ${t(top.home_team)} ${fN(top.projected_home_runs)}<br>`;
+    if(top.has_kelly_edge) resp+=`Kelly suggests: ${fKelly(top.kelly_half_pct)} of bankroll<br>`;
+    resp+=`<br><strong>Runner up:</strong> ${t(runner.projected_winner)} in ${t(runner.away_team)} @ ${t(runner.home_team)} (${fP(runner.projected_confidence_pct)})`;
+    if(runner._reasons.length) resp+=` -- ${runner._reasons.slice(0,2).join(", ")}`;
+    return resp;
+  }
+
   // ─── TEAM MATCH (fallback -- just mentioning a team without a clear question) ───
   if(teamGame) {
     return gameBreakdown(teamGame);
   }
 
-  // ─── SMART FALLBACK -- actually analyze the board instead of a generic help message ───
-  const topPick = [...games].sort((a,b)=>(b.projected_confidence_pct||0)-(a.projected_confidence_pct||0))[0];
+  // ─── GENERAL / CONVERSATIONAL FALLBACK ───
+  // Instead of a help menu, actually analyze the board and give a real take
+  const scored = games.map(g=>{
+    let score = (g.projected_confidence_pct||0)/10 + (g.kelly_edge||0)*50 + (g.historical_bucket_accuracy_pct||50)/20;
+    if(Number(g.is_go_play)===1) score+=5;
+    return {...g, _score:score};
+  }).sort((a,b)=>b._score-a._score);
   const bestBets = games.filter(g=>Number(g.is_go_play)===1);
-  let resp = `I'm not sure exactly what you're asking, but here's a quick read on today's board:<br><br>`;
-  resp+=`<strong>${games.length} games</strong> today. `;
-  if(bestBets.length) resp+=`${bestBets.length} Best Bet${bestBets.length!==1?"s":""}. `;
-  if(topPick) resp+=`Highest confidence: <strong>${t(topPick.projected_winner)}</strong> at ${fP(topPick.projected_confidence_pct)} in ${t(topPick.away_team)} @ ${t(topPick.home_team)}.<br><br>`;
-  resp+=`Try asking me things like:<br>`;
-  resp+=`-- "Break down the ${t(topPick?.away_team)} game"<br>`;
-  resp+=`-- "Build me a 3-leg parlay"<br>`;
-  resp+=`-- "Which games should I avoid?"<br>`;
-  resp+=`-- "What's the safest bet today?"<br>`;
-  resp+=`-- "How's the model doing this season?"<br>`;
-  resp+=`-- "Any underdog plays?"`;
+  const disagrees = games.filter(g=>g.model_vs_market==="DISAGREE");
+  const withEdge = games.filter(g=>g.has_kelly_edge);
+  const topGame = scored[0];
+  const pickedOdds = topGame?topGame.projected_winner_side==="home"?topGame.vegas_moneyline_home:topGame.vegas_moneyline_away:null;
+
+  let resp = `<strong>Here's my read on today's board:</strong><br><br>`;
+  resp+=`${games.length} games. `;
+  if(bestBets.length) resp+=`<strong>${bestBets.length} Best Bet${bestBets.length!==1?"s":""}</strong>. `;
+  resp+=`${withEdge.length} games have positive edge over the odds. ${disagrees.length} where we disagree with Vegas.<br><br>`;
+
+  if(topGame){
+    resp+=`<strong>My top play:</strong> ${t(topGame.projected_winner)} (${fMl(pickedOdds)}) in ${t(topGame.away_team)} @ ${t(topGame.home_team)} -- `;
+    resp+=`${fP(topGame.projected_confidence_pct)} confident, `;
+    if(topGame.kelly_edge) resp+=`+${(topGame.kelly_edge*100).toFixed(0)}% edge, `;
+    resp+=`${fP(topGame.historical_bucket_accuracy_pct)} track record.<br><br>`;
+  }
+
+  // Quick board temperature
+  const avgConf = games.reduce((s,g)=>s+(g.projected_confidence_pct||0),0)/games.length;
+  if(avgConf>=65) resp+=`Board temperature: <strong>Hot</strong> -- lots of separation today, good spots to play.<br>`;
+  else if(avgConf>=58) resp+=`Board temperature: <strong>Warm</strong> -- some good spots but be selective.<br>`;
+  else resp+=`Board temperature: <strong>Cool</strong> -- not a lot of clear edges. Selective day.<br>`;
+
+  resp+=`<br>Ask me anything -- specific games, parlays, "$500 bankroll sizing", underdog plays, or just "which is better, the Yankees or Dodgers game?"`;
   return resp;
 }
 
