@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<title>Degens MLB - Smart Picks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --sb-bg: #0b1120;
+  --sb-surface: #111827;
+  --sb-surface-2: #1a2436;
+  --sb-surface-3: #243044;
+  --sb-border: rgba(255,255,255,0.07);
+  --sb-border-strong: rgba(255,255,255,0.12);
+  --sb-text: #f1f5f9;
+  --sb-muted: #64748b;
+  --sb-green: #22c55e;
+  --sb-green-glow: rgba(34,197,94,0.2);
+  --sb-blue: #3b82f6;
+  --sb-blue-glow: rgba(59,130,246,0.15);
+  --sb-gold: #f59e0b;
+  --sb-gold-glow: rgba(245,158,11,0.15);
+  --sb-red: #ef4444;
+  --sb-red-glow: rgba(239,68,68,0.15);
+  --sb-purple: #a855f7;
+  --sb-glass: rgba(17,24,39,0.88);
+  --sb-radius: 14px;
+  --sb-radius-sm: 10px;
+  --sb-radius-lg: 20px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  background:var(--sb-bg);
+  color:var(--sb-text);
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:14px;
+  line-height:1.5;
+  min-height:100vh;
+  min-height:100dvh;
+  padding-bottom:140px;
+  overflow-x:hidden;
+}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit}
+a{color:inherit;text-decoration:none}
+
+/* ─── STICKY HEADER ─── */
+.sb-header{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;gap:10px;
+  padding:10px 16px;
+  background:rgba(11,17,32,0.92);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--sb-border);
+}
+.sb-header-logo{width:32px;height:32px;border-radius:10px;object-fit:cover}
+.sb-header-brand{font-size:16px;font-weight:800;letter-spacing:-0.02em;flex:1}
+.sb-header-brand span{color:var(--sb-green)}
+.sb-header-pill{
+  font-size:11px;font-weight:600;
+  padding:5px 10px;border-radius:99px;
+  background:var(--sb-surface-2);border:1px solid var(--sb-border);
+  color:var(--sb-muted);white-space:nowrap;
+}
+.sb-header-pill.is-live{color:var(--sb-green);border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.08)}
+.sb-header-pill.is-live::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--sb-green);margin-right:5px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* ─── HERO ─── */
+.sb-hero{
+  margin:16px;padding:20px;
+  border-radius:var(--sb-radius-lg);
+  background:linear-gradient(135deg,rgba(34,197,94,0.12) 0%,rgba(59,130,246,0.08) 50%,rgba(168,85,247,0.06) 100%),var(--sb-surface);
+  border:1px solid rgba(34,197,94,0.2);
+  position:relative;overflow:hidden;
+}
+.sb-hero::before{
+  content:'';position:absolute;top:-40%;right:-20%;width:300px;height:300px;
+  background:radial-gradient(circle,rgba(34,197,94,0.15),transparent 70%);
+  pointer-events:none;
+}
+.sb-hero-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:99px;
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;
+  background:rgba(34,197,94,0.12);color:var(--sb-green);border:1px solid rgba(34,197,94,0.25);
+  margin-bottom:12px;
+}
+.sb-hero-matchup{font-size:24px;font-weight:800;letter-spacing:-0.03em;margin-bottom:4px}
+.sb-hero-time{font-size:12px;color:var(--sb-muted);margin-bottom:14px}
+.sb-hero-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.sb-hero-ring{position:relative;width:80px;height:80px;flex-shrink:0}
+.sb-hero-ring svg{transform:rotate(-90deg)}
+.sb-hero-ring-label{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:20px;font-weight:800;line-height:1;
+}
+.sb-hero-ring-label small{font-size:9px;font-weight:600;color:var(--sb-muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:2px}
+.sb-hero-info{flex:1;min-width:0}
+.sb-hero-pick{font-size:15px;font-weight:700;margin-bottom:4px}
+.sb-hero-pick em{font-style:normal;color:var(--sb-green)}
+.sb-hero-body{font-size:13px;color:var(--sb-muted);line-height:1.5}
+.sb-hero-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.sb-hero-chip{
+  font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px;
+  background:var(--sb-surface-2);border:1px solid var(--sb-border);color:var(--sb-muted);
+}
+
+/* ─── TABS ─── */
+.sb-tabs{
+  display:flex;gap:4px;padding:0 16px;margin-bottom:8px;overflow-x:auto;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+}
+.sb-tabs::-webkit-scrollbar{display:none}
+.sb-tab{
+  padding:10px 18px;border-radius:var(--sb-radius-sm);
+  font-size:13px;font-weight:600;color:var(--sb-muted);white-space:nowrap;
+  transition:all 0.2s;
+}
+.sb-tab.is-active{background:var(--sb-green);color:#000}
+.sb-tab .sb-tab-count{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:20px;height:20px;border-radius:99px;
+  font-size:11px;font-weight:700;margin-left:6px;
+  background:rgba(255,255,255,0.15);padding:0 5px;
+}
+.sb-tab.is-active .sb-tab-count{background:rgba(0,0,0,0.2)}
+
+/* ─── FILTERS ─── */
+.sb-filters{
+  display:flex;gap:6px;padding:4px 16px 12px;overflow-x:auto;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+}
+.sb-filters::-webkit-scrollbar{display:none}
+.sb-filter{
+  padding:7px 14px;border-radius:99px;
+  font-size:12px;font-weight:600;color:var(--sb-muted);white-space:nowrap;
+  border:1px solid var(--sb-border);background:var(--sb-surface);
+  transition:all 0.2s;
+}
+.sb-filter.is-active{background:var(--sb-surface-2);color:var(--sb-text);border-color:var(--sb-border-strong)}
+
+/* ─── GAME CARDS ─── */
+.sb-board{padding:0 12px;display:grid;gap:8px}
+.sb-game{
+  border-radius:var(--sb-radius);overflow:hidden;
+  background:var(--sb-surface);border:1px solid var(--sb-border);
+  transition:border-color 0.2s;
+}
+.sb-game.is-disagree{border-color:rgba(245,158,11,0.35)}
+.sb-game.is-best-bet{border-color:rgba(34,197,94,0.3)}
+
+.sb-game-head{
+  width:100%;padding:14px;text-align:left;
+  display:grid;gap:10px;
+}
+.sb-game-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sb-game-time{font-size:11px;color:var(--sb-muted);font-weight:500}
+.sb-game-tags{display:flex;gap:5px;flex-wrap:wrap}
+.sb-game-tag{
+  font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;
+  text-transform:uppercase;letter-spacing:0.04em;
+}
+.sb-game-tag-best{background:rgba(34,197,94,0.12);color:var(--sb-green);border:1px solid rgba(34,197,94,0.25)}
+.sb-game-tag-pass{background:rgba(239,68,68,0.1);color:var(--sb-red);border:1px solid rgba(239,68,68,0.2)}
+.sb-game-tag-vs{background:rgba(245,158,11,0.1);color:var(--sb-gold);border:1px solid rgba(245,158,11,0.2)}
+.sb-game-tag-hot{background:rgba(168,85,247,0.1);color:var(--sb-purple);border:1px solid rgba(168,85,247,0.2)}
+.sb-game-tag-tier{background:var(--sb-surface-2);color:var(--sb-muted);border:1px solid var(--sb-border)}
+
+.sb-game-teams{display:flex;align-items:center;gap:12px}
+.sb-game-vs{
+  flex:1;display:flex;align-items:center;gap:10px;
+  font-size:17px;font-weight:800;letter-spacing:-0.02em;
+}
+.sb-game-at{font-size:12px;font-weight:500;color:var(--sb-muted)}
+.sb-game-expand{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--sb-surface-2);border:1px solid var(--sb-border);
+  font-size:18px;color:var(--sb-muted);transition:transform 0.25s;
+}
+.sb-game.is-open .sb-game-expand{transform:rotate(45deg)}
+
+.sb-game-glance{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.sb-glance{
+  padding:10px;border-radius:var(--sb-radius-sm);
+  background:var(--sb-surface-2);border:1px solid var(--sb-border);
+}
+.sb-glance-label{display:block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--sb-muted);margin-bottom:4px}
+.sb-glance-value{display:block;font-size:13px;font-weight:700}
+
+/* confidence bar */
+.sb-conf-bar{height:4px;border-radius:99px;background:var(--sb-surface-3);overflow:hidden;margin-top:8px}
+.sb-conf-fill{height:100%;border-radius:99px;transition:width 0.5s ease}
+
+/* expanded body */
+.sb-game-body{
+  padding:0 14px 14px;
+  border-top:1px solid var(--sb-border);
+  display:grid;gap:10px;
+}
+.sb-game-body[hidden]{display:none}
+
+.sb-sub-tabs{display:flex;gap:4px;padding-top:10px}
+.sb-sub-tab{
+  padding:7px 14px;border-radius:var(--sb-radius-sm);
+  font-size:12px;font-weight:600;color:var(--sb-muted);
+  background:var(--sb-surface-2);border:1px solid var(--sb-border);
+  transition:all 0.2s;
+}
+.sb-sub-tab.is-active{background:var(--sb-green);color:#000;border-color:var(--sb-green)}
+
+.sb-detail-panel{display:none}
+.sb-detail-panel.is-active{display:grid;gap:8px}
+
+.sb-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.sb-detail-cell{
+  padding:12px;border-radius:var(--sb-radius-sm);
+  background:var(--sb-surface-2);border:1px solid var(--sb-border);
+}
+.sb-detail-cell.is-full{grid-column:1/-1}
+.sb-detail-label{display:block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--sb-muted);margin-bottom:6px}
+.sb-detail-value{display:block;font-size:14px;font-weight:700}
+.sb-detail-value.is-green{color:var(--sb-green)}
+.sb-detail-value.is-red{color:var(--sb-red)}
+.sb-detail-value.is-gold{color:var(--sb-gold)}
+.sb-detail-value.is-blue{color:var(--sb-blue)}
+
+.sb-detail-section-title{
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;
+  color:var(--sb-green);padding:8px 0 4px;
+}
+
+/* model view accent */
+.sb-model-panel .sb-detail-cell{border-color:rgba(34,197,94,0.12)}
+.sb-vegas-panel .sb-detail-cell{border-color:rgba(59,130,246,0.12)}
+.sb-spread-panel .sb-detail-cell{border-color:rgba(245,158,11,0.12)}
+
+/* ─── ACCURACY DASHBOARD ─── */
+.sb-accuracy-section{padding:16px;margin-top:8px}
+.sb-accuracy-title{font-size:16px;font-weight:700;margin-bottom:4px}
+.sb-accuracy-sub{font-size:12px;color:var(--sb-muted);margin-bottom:12px}
+.sb-accuracy-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sb-accuracy-card{
+  padding:14px;border-radius:var(--sb-radius);
+  background:var(--sb-surface);border:1px solid var(--sb-border);
+  text-align:center;
+}
+.sb-accuracy-label{display:block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--sb-muted);margin-bottom:8px}
+.sb-accuracy-pct{display:block;font-size:22px;font-weight:800;margin-bottom:2px}
+.sb-accuracy-record{display:block;font-size:11px;color:var(--sb-muted);margin-bottom:8px}
+.sb-accuracy-bar{height:4px;border-radius:99px;background:var(--sb-surface-3);overflow:hidden}
+.sb-accuracy-fill{height:100%;border-radius:99px}
+
+/* ─── AI CHAT ─── */
+.sb-chat-btn{
+  position:fixed;bottom:76px;right:16px;z-index:90;
+  width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,var(--sb-green),#16a34a);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(34,197,94,0.35);
+  transition:transform 0.2s;
+}
+.sb-chat-btn:active{transform:scale(0.92)}
+.sb-chat-btn svg{width:26px;height:26px;fill:#000}
+
+.sb-chat-panel{
+  position:fixed;inset:0;z-index:200;
+  display:flex;flex-direction:column;
+  background:var(--sb-bg);
+  transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);
+}
+.sb-chat-panel.is-open{transform:translateY(0)}
+.sb-chat-head{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 16px;
+  background:var(--sb-surface);border-bottom:1px solid var(--sb-border);
+}
+.sb-chat-head-title{flex:1;font-size:15px;font-weight:700}
+.sb-chat-head-title span{color:var(--sb-green)}
+.sb-chat-close{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--sb-surface-2);font-size:18px;color:var(--sb-muted);
+}
+.sb-chat-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.sb-chat-msg{
+  max-width:88%;padding:12px 14px;border-radius:var(--sb-radius);
+  font-size:13px;line-height:1.55;
+}
+.sb-chat-msg-ai{
+  background:var(--sb-surface);border:1px solid var(--sb-border);
+  align-self:flex-start;
+}
+.sb-chat-msg-user{
+  background:var(--sb-green);color:#000;font-weight:500;
+  align-self:flex-end;
+}
+.sb-chat-prompts{
+  display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 8px;
+}
+.sb-chat-prompt{
+  padding:8px 14px;border-radius:99px;
+  font-size:12px;font-weight:600;color:var(--sb-green);
+  background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);
+  transition:all 0.2s;
+}
+.sb-chat-prompt:active{background:rgba(34,197,94,0.18)}
+.sb-chat-input-bar{
+  display:flex;gap:8px;padding:12px 16px;
+  background:var(--sb-surface);border-top:1px solid var(--sb-border);
+  padding-bottom:max(12px,env(safe-area-inset-bottom));
+}
+.sb-chat-input{
+  flex:1;padding:10px 14px;border-radius:99px;
+  background:var(--sb-surface-2);border:1px solid var(--sb-border);
+  color:var(--sb-text);font-size:13px;font-family:inherit;
+  outline:none;
+}
+.sb-chat-input::placeholder{color:var(--sb-muted)}
+.sb-chat-send{
+  width:40px;height:40px;border-radius:50%;flex-shrink:0;
+  background:var(--sb-green);display:flex;align-items:center;justify-content:center;
+}
+.sb-chat-send svg{width:18px;height:18px;fill:#000}
+
+/* ─── BOTTOM NAV ─── */
+.sb-bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  display:grid;grid-template-columns:repeat(4,1fr);
+  background:rgba(11,17,32,0.95);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-top:1px solid var(--sb-border);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.sb-nav-item{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:8px 0 6px;font-size:10px;font-weight:600;color:var(--sb-muted);
+  transition:color 0.2s;
+}
+.sb-nav-item.is-active{color:var(--sb-green)}
+.sb-nav-item svg{width:22px;height:22px}
+.sb-nav-item.is-active svg{fill:var(--sb-green)}
+
+/* ─── KELLY CRITERION ─── */
+.sb-kelly-bar{display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px 10px;border-radius:var(--sb-radius-sm);background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.15)}
+.sb-kelly-bar-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--sb-purple);white-space:nowrap}
+.sb-kelly-bar-track{flex:1;height:6px;border-radius:99px;background:var(--sb-surface-3);overflow:hidden}
+.sb-kelly-bar-fill{height:100%;border-radius:99px;background:var(--sb-purple);transition:width 0.5s ease}
+.sb-kelly-bar-value{font-size:12px;font-weight:700;color:var(--sb-purple);white-space:nowrap}
+.sb-kelly-section{margin-top:6px;padding:12px;border-radius:var(--sb-radius-sm);background:linear-gradient(135deg,rgba(168,85,247,0.06),rgba(59,130,246,0.04));border:1px solid rgba(168,85,247,0.15)}
+.sb-kelly-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--sb-purple);margin-bottom:8px}
+.sb-kelly-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.sb-kelly-cell{padding:10px;border-radius:var(--sb-radius-sm);background:rgba(168,85,247,0.05);border:1px solid rgba(168,85,247,0.1)}
+.sb-kelly-cell.is-full-width{grid-column:1/-1}
+.sb-kelly-meter{display:flex;gap:2px;margin-top:6px}
+.sb-kelly-meter-seg{flex:1;height:4px;border-radius:2px;background:var(--sb-surface-3)}
+.sb-kelly-meter-seg.is-filled{background:var(--sb-purple)}
+.sb-game-tag-edge{background:rgba(168,85,247,0.1);color:var(--sb-purple);border:1px solid rgba(168,85,247,0.2)}
+.sb-kelly-no-edge{color:var(--sb-muted);font-style:italic;font-size:12px;padding:8px 0}
+
+/* ─── EMPTY STATE ─── */
+.sb-empty{padding:24px;text-align:center;color:var(--sb-muted);border:1px dashed var(--sb-border);border-radius:var(--sb-radius)}
+
+/* ─── SECTION HEADINGS ─── */
+.sb-section-head{padding:16px 16px 8px}
+.sb-section-title{font-size:16px;font-weight:700}
+.sb-section-sub{font-size:12px;color:var(--sb-muted)}
+
+/* ─── DESKTOP ─── */
+@media(min-width:768px){
+  body{padding-bottom:60px}
+  .sb-board{grid-template-columns:1fr 1fr;padding:0 16px}
+  .sb-game.is-open{grid-column:1/-1}
+  .sb-accuracy-grid{max-width:600px}
+  .sb-chat-panel{left:auto;width:420px;right:0;border-left:1px solid var(--sb-border);border-radius:var(--sb-radius-lg) 0 0 0}
+  .sb-hero{margin:16px auto;max-width:900px}
+}
+@media(min-width:1024px){
+  .sb-board{grid-template-columns:1fr 1fr 1fr}
+}
+@media(max-width:400px){
+  .sb-accuracy-grid{grid-template-columns:1fr}
+  .sb-game-glance{grid-template-columns:1fr}
+  .sb-hero-matchup{font-size:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="sb-header">
+  <img class="sb-header-logo" src="./delly.png" alt=""/>
+  <div class="sb-header-brand">Degens <span>MLB</span></div>
+  <span class="sb-header-pill is-live" id="header-time">Updating...</span>
+  <span class="sb-header-pill" id="header-record">--</span>
+</header>
+
+<!-- HERO -->
+<section class="sb-hero" id="hero-section"></section>
+
+<!-- TABS -->
+<nav class="sb-tabs" id="day-tabs"></nav>
+
+<!-- FILTERS -->
+<div class="sb-filters" id="filter-bar"></div>
+
+<!-- BOARD -->
+<div class="sb-section-head"><h2 class="sb-section-title" id="board-title">Today's Games</h2></div>
+<div class="sb-board" id="board"></div>
+
+<!-- RECENT RESULTS -->
+<div class="sb-section-head" id="results-head" hidden><h2 class="sb-section-title">Recent Results</h2><p class="sb-section-sub">Yesterday's outcomes</p></div>
+<div class="sb-board" id="results-board" hidden></div>
+
+<!-- ACCURACY -->
+<section class="sb-accuracy-section" id="accuracy-section">
+  <h2 class="sb-accuracy-title">Season Stats</h2>
+  <p class="sb-accuracy-sub" id="accuracy-sub">2026 season tracking</p>
+  <div class="sb-accuracy-grid" id="accuracy-grid"></div>
+</section>
+
+<!-- CHAT BUTTON -->
+<button class="sb-chat-btn" id="chat-btn" aria-label="AI Analyst">
+  <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.2L4 17.2V4h16v12z"/><path d="M7 9h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/></svg>
+</button>
+
+<!-- CHAT PANEL -->
+<div class="sb-chat-panel" id="chat-panel">
+  <div class="sb-chat-head">
+    <div class="sb-chat-head-title">AI <span>Analyst</span></div>
+    <button class="sb-chat-close" id="chat-close">&times;</button>
+  </div>
+  <div class="sb-chat-body" id="chat-body">
+    <div class="sb-chat-msg sb-chat-msg-ai">Hey! I'm your AI betting analyst powered by Claude. I've got today's full board loaded -- every game, every projection, every edge.<br><br>Ask me anything: matchup breakdowns, parlay builds, which games to avoid, how the model's performing, or just "what should I bet today?"</div>
+  </div>
+  <div class="sb-chat-prompts" id="chat-prompts"></div>
+  <div class="sb-chat-input-bar">
+    <input class="sb-chat-input" id="chat-input" placeholder="Ask about today's games..." autocomplete="off"/>
+    <button class="sb-chat-send" id="chat-send">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="sb-bottom-nav">
+  <button class="sb-nav-item is-active" data-nav="board">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+    Board
+  </button>
+  <button class="sb-nav-item" data-nav="best">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+    Best Bets
+  </button>
+  <button class="sb-nav-item" data-nav="ai">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+    AI Analyst
+  </button>
+  <button class="sb-nav-item" data-nav="stats">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+    Stats
+  </button>
+</nav>
+
+<script>
+const DATA_URL = "./data/current-board.json";
+const TEAM_MAP = {ANA:"LAA",AZ:"ARI",CHA:"CWS",CHN:"CHC",KCA:"KC",LAN:"LAD",NYA:"NYY",NYN:"NYM",SDN:"SD",SFN:"SF",SLN:"STL",TBA:"TB",WAS:"WSH"};
+const t = v => TEAM_MAP[v]||v||"--";
+const tText = s => {if(!s) return s;let o=String(s);for(const[r,d] of Object.entries(TEAM_MAP))o=o.replace(new RegExp(`\\b${r}\\b`,"g"),d);o=o.replace(/\u00e2\u20ac\u00a2/g,"\u2022");o=o.replace(/\bmodel and market\b/gi,"Model and Vegas");o=o.replace(/\bmarket\b/gi,"Vegas");return o};
+const fN = (v,d=1) => v==null?"--":Number(v).toFixed(d);
+const fP = v => v==null?"--":`${Number(v).toFixed(1)}%`;
+const fMl = v => {if(v==null)return"--";return v>0?`+${v}`:`${v}`};
+const fSig = (v,d=1) => {if(v==null)return"--";const n=Number(v);return `${n>0?"+":""}${n.toFixed(d)}`};
+const fTime = v => {if(!v)return"TBD";try{return new Date(v).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",timeZoneName:"short"})}catch{return"TBD"}};
+const fDate = v => {if(!v)return"";return new Date(`${v}T12:00:00`).toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})};
+// v3 safe classifier confidence range: 53-89% (wider than old 50-78%)
+const confColor = p => {if(p==null)return"var(--sb-muted)";if(p>=72)return"var(--sb-green)";if(p>=60)return"var(--sb-gold)";return"var(--sb-red)"};
+const hasOU = g => g.projected_ou_pick!=null;
+
+// Kelly criterion helpers
+const kellyColor = edge => {if(edge==null||edge<=0)return"var(--sb-muted)";if(edge>=0.15)return"var(--sb-green)";if(edge>=0.05)return"var(--sb-purple)";return"var(--sb-gold)"};
+const kellyLabel = halfPct => {if(halfPct==null||halfPct<=0)return"No Edge";if(halfPct>=15)return"Strong";if(halfPct>=5)return"Moderate";if(halfPct>=1)return"Small";return"Tiny"};
+const kellySegs = halfPct => {if(halfPct==null||halfPct<=0)return 0;if(halfPct>=15)return 5;if(halfPct>=10)return 4;if(halfPct>=5)return 3;if(halfPct>=2)return 2;return 1};
+const fKelly = v => v==null?"--":`${Number(v).toFixed(1)}%`;
+
+let state = {data:null,day:"today",filter:"all",expanded:null,chatOpen:false};
+
+// ─── RENDER HEADER ───
+function renderHeader(meta,acc){
+  document.getElementById("header-time").textContent = meta?.generatedAt
+    ? new Date(meta.generatedAt).toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})
+    : "Live";
+  const ml = acc?.lanes?.moneyline;
+  if(ml) document.getElementById("header-record").textContent = `${ml.correct}-${ml.gradedGames-ml.correct} | ${fP(ml.accuracyPct)}`;
+}
+
+// ─── RENDER HERO ───
+function renderHero(featured,games){
+  const el = document.getElementById("hero-section");
+  const featPick = featured?.find(f=>f.card_type==="go_play");
+  // Merge featured card with matching game to get commence_time_utc
+  let topGame = featPick;
+  if(featPick && games){
+    const match = games.find(g=>g.gamePk===featPick.gamePk);
+    if(match) topGame = {...match,...featPick};
+  }
+  if(!topGame) topGame = games?.[0];
+  if(!topGame){el.innerHTML='<p style="color:var(--sb-muted)">No picks available yet.</p>';return}
+  const conf = topGame.confidence_score_pct || topGame.projected_confidence_pct || 0;
+  const circumference = 2*Math.PI*34;
+  const offset = circumference - (conf/100)*circumference;
+  el.innerHTML = `
+    <div class="sb-hero-badge">Top Pick Today</div>
+    <h2 class="sb-hero-matchup">${t(topGame.away_team)} @ ${t(topGame.home_team)}</h2>
+    <p class="sb-hero-time">${fDate(topGame.board_display_date||topGame.game_date)} &bull; ${fTime(topGame.commence_time_utc)}</p>
+    <div class="sb-hero-row">
+      <div class="sb-hero-ring">
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="34" fill="none" stroke="var(--sb-surface-3)" stroke-width="6"/>
+          <circle cx="40" cy="40" r="34" fill="none" stroke="${confColor(conf)}" stroke-width="6"
+            stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" stroke-linecap="round"
+            style="transition:stroke-dashoffset 1s ease"/>
+        </svg>
+        <div class="sb-hero-ring-label">
+          ${Math.round(conf)}%
+          <small>Sure</small>
+        </div>
+      </div>
+      <div class="sb-hero-info">
+        <p class="sb-hero-pick">Our Pick: <em>${t(topGame.pick_team||topGame.projected_winner)}</em> ${topGame.pick_type==="runline"?"Spread":topGame.pick_type==="moneyline"?"Moneyline":""}</p>
+        <p class="sb-hero-body">${tText(topGame.body_text||topGame.featured_body_text||"Strong edge on this matchup based on our model projections.")}</p>
+      </div>
+    </div>
+    <div class="sb-hero-chips">
+      ${topGame.chip_1?`<span class="sb-hero-chip">${tText(topGame.chip_1)}</span>`:""}
+      ${topGame.chip_2?`<span class="sb-hero-chip">${tText(topGame.chip_2)}</span>`:""}
+      <span class="sb-hero-chip">Score: ${fN(topGame.projected_away_runs)}-${fN(topGame.projected_home_runs)}</span>
+      ${topGame.has_kelly_edge?`<span class="sb-hero-chip" style="color:var(--sb-purple);border-color:rgba(168,85,247,0.3);background:rgba(168,85,247,0.08)">Bet Size: ${fKelly(topGame.kelly_half_pct)} &bull; Edge +${(topGame.kelly_edge*100).toFixed(0)}%</span>`:""}
+    </div>
+  `;
+}
+
+// ─── RENDER TABS ───
+function renderTabs(todayCount,tmrwCount,recentCount){
+  const el = document.getElementById("day-tabs");
+  el.innerHTML = [
+    {key:"today",label:"Today",count:todayCount},
+    {key:"tomorrow",label:"Tomorrow",count:tmrwCount},
+    {key:"results",label:"Results",count:recentCount},
+  ].map(t=>`<button class="sb-tab${state.day===t.key?" is-active":""}" data-day="${t.key}">${t.label}<span class="sb-tab-count">${t.count}</span></button>`).join("");
+  el.querySelectorAll(".sb-tab").forEach(btn=>btn.onclick=()=>{state.day=btn.dataset.day;render()});
+}
+
+// ─── RENDER FILTERS ───
+function renderFilters(){
+  const el = document.getElementById("filter-bar");
+  const filters = [
+    {key:"all",label:"All Games"},
+    {key:"best",label:"Best Bets"},
+    {key:"spread",label:"Spread Plays"},
+    {key:"against",label:"Against Vegas"},
+    {key:"hot",label:"Hot Zone"},
+  ];
+  el.innerHTML = filters.map(f=>`<button class="sb-filter${state.filter===f.key?" is-active":""}" data-f="${f.key}">${f.label}</button>`).join("");
+  el.querySelectorAll(".sb-filter").forEach(btn=>btn.onclick=()=>{state.filter=btn.dataset.f;render()});
+}
+
+// ─── BUILD GAME CARD ───
+function buildCard(g){
+  const isOpen = state.expanded===g.gamePk;
+  const isBest = Number(g.is_go_play)===1;
+  const isPass = Number(g.is_stay_away)===1;
+  const isDisagree = g.model_vs_market==="DISAGREE";
+  const conf = g.projected_confidence_pct;
+  const thresholds = state.data?.meta?.roiThresholds || {};
+
+  let tags = "";
+  if(isBest) tags+=`<span class="sb-game-tag sb-game-tag-best">Best Bet</span>`;
+  if(isPass) tags+=`<span class="sb-game-tag sb-game-tag-pass">Pass</span>`;
+  if(isDisagree) tags+=`<span class="sb-game-tag sb-game-tag-vs">Against Vegas</span>`;
+  if(g.edge_tier_label) tags+=`<span class="sb-game-tag sb-game-tag-tier">${g.edge_tier_label}</span>`;
+  if(g.moneyline_roi_play && thresholds.moneyline?.isProfitable!==false) tags+=`<span class="sb-game-tag sb-game-tag-hot">${thresholds.moneyline?.label||"ML Hot"}</span>`;
+  if(g.runline_roi_play && thresholds.runline?.isProfitable!==false) tags+=`<span class="sb-game-tag sb-game-tag-hot">${thresholds.runline?.label||"RL Hot"}</span>`;
+  if(g.total_roi_play && thresholds.total?.isProfitable!==false) tags+=`<span class="sb-game-tag sb-game-tag-hot">${thresholds.total?.label||"O/U Hot"}</span>`;
+  if(g.has_kelly_edge && g.kelly_edge>=0.05) tags+=`<span class="sb-game-tag sb-game-tag-edge">Edge ${(g.kelly_edge*100).toFixed(0)}%</span>`;
+
+  const pickedOdds = g.projected_winner_side==="home"?g.vegas_moneyline_home:g.vegas_moneyline_away;
+
+  const runlineText = g.projected_runline_pick ? `${tText(g.projected_runline_pick)}${g.projected_runline_confidence_pct!=null?` (${fP(g.projected_runline_confidence_pct)})`:""}` : "--";
+  const ouText = g.projected_ou_pick ? `${g.projected_ou_pick} ${fN(g.vegas_total_line)}${g.projected_ou_confidence_pct!=null?` (${fP(g.projected_ou_confidence_pct)})`:""}` : (g.vegas_total_line!=null?`Line: ${fN(g.vegas_total_line)}`:"--");
+
+  return `
+  <article class="sb-game${isOpen?" is-open":""}${isBest?" is-best-bet":""}${isDisagree?" is-disagree":""}" data-pk="${g.gamePk}">
+    <button class="sb-game-head" data-pk="${g.gamePk}">
+      <div class="sb-game-top">
+        <span class="sb-game-time">${fTime(g.commence_time_utc)}</span>
+        <div class="sb-game-tags">${tags}</div>
+      </div>
+      <div class="sb-game-teams">
+        <div class="sb-game-vs">
+          <span>${t(g.away_team)}</span>
+          <span class="sb-game-at">@</span>
+          <span>${t(g.home_team)}</span>
+        </div>
+        <div style="text-align:right;margin-right:8px">
+          <span style="font-size:11px;color:var(--sb-muted);display:block">Our Pick</span>
+          <span style="font-size:14px;font-weight:700;color:var(--sb-green)">${t(g.projected_winner)} ${fMl(pickedOdds)}</span>
+        </div>
+        <div class="sb-game-expand">+</div>
+      </div>
+      <div class="sb-conf-bar"><div class="sb-conf-fill" style="width:${conf||0}%;background:${confColor(conf)}"></div></div>
+      ${g.has_kelly_edge?`<div class="sb-kelly-bar">
+        <span class="sb-kelly-bar-label">Bet Size</span>
+        <div class="sb-kelly-bar-track"><div class="sb-kelly-bar-fill" style="width:${Math.min(g.kelly_half_pct||0,30)/30*100}%"></div></div>
+        <span class="sb-kelly-bar-value">${fKelly(g.kelly_half_pct)}</span>
+      </div>`:""}
+      <div class="sb-game-glance">
+        <div class="sb-glance"><span class="sb-glance-label">How Sure</span><span class="sb-glance-value" style="color:${confColor(conf)}">${fP(conf)}</span></div>
+        <div class="sb-glance"><span class="sb-glance-label">Projected Score</span><span class="sb-glance-value">${fN(g.projected_away_runs)}-${fN(g.projected_home_runs)}</span></div>
+        <div class="sb-glance"><span class="sb-glance-label">Spread Pick</span><span class="sb-glance-value">${runlineText}</span></div>
+        <div class="sb-glance"><span class="sb-glance-label">${g.has_kelly_edge?"Edge Over Odds":hasOU(g)?"Over/Under":"O/U Line"}</span><span class="sb-glance-value" style="${g.has_kelly_edge?"color:var(--sb-purple)":""}">${g.has_kelly_edge?`+${(g.kelly_edge*100).toFixed(1)}%`:ouText}</span></div>
+      </div>
+    </button>
+    <div class="sb-game-body" ${isOpen?"":"hidden"}>
+      <div class="sb-sub-tabs">
+        <button class="sb-sub-tab is-active" data-sub="model">Our Model</button>
+        <button class="sb-sub-tab" data-sub="vegas">Vegas Lines</button>
+        <button class="sb-sub-tab" data-sub="spread">${hasOU(g)?"Spread & O/U":"Spread"}</button>
+      </div>
+
+      <!-- OUR MODEL -->
+      <div class="sb-detail-panel sb-model-panel is-active" data-panel="model">
+        <div class="sb-detail-grid">
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">Our Pick</span>
+            <span class="sb-detail-value is-green">${t(g.projected_winner)}</span>
+          </div>
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">How Sure We Are</span>
+            <span class="sb-detail-value" style="color:${confColor(conf)}">${fP(conf)}</span>
+          </div>
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">Projected Score</span>
+            <span class="sb-detail-value">${t(g.away_team)} ${fN(g.projected_away_runs)} - ${t(g.home_team)} ${fN(g.projected_home_runs)}</span>
+          </div>
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">Expected Margin</span>
+            <span class="sb-detail-value ${Number(g.projected_score_diff)>0?"is-green":"is-red"}">${fSig(g.projected_score_diff,2)} runs</span>
+          </div>
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">Win Probability</span>
+            <span class="sb-detail-value">${t(g.away_team)} ${fP(g.away_win_prob?g.away_win_prob*100:null)} / ${t(g.home_team)} ${fP(g.home_win_prob?g.home_win_prob*100:null)}</span>
+          </div>
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">Strength</span>
+            <span class="sb-detail-value">${g.edge_tier_label||"--"}</span>
+          </div>
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">Track Record</span>
+            <span class="sb-detail-value">${fP(g.historical_bucket_accuracy_pct)} in ${g.historical_bucket_games||"--"} similar games</span>
+          </div>
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">Model vs Vegas</span>
+            <span class="sb-detail-value ${isDisagree?"is-gold":"is-green"}">${isDisagree?"Against the Line":"Lines Up"}</span>
+          </div>
+        </div>
+        ${g.has_kelly_edge?`
+        <div class="sb-kelly-section">
+          <div class="sb-kelly-section-title">Kelly Criterion Sizing</div>
+          <div class="sb-kelly-grid">
+            <div class="sb-kelly-cell">
+              <span class="sb-detail-label">Edge Over Odds</span>
+              <span class="sb-detail-value" style="color:${kellyColor(g.kelly_edge)}">+${(g.kelly_edge*100).toFixed(1)}%</span>
+              <div class="sb-kelly-meter">${Array.from({length:5},(_, i)=>`<div class="sb-kelly-meter-seg${i<kellySegs(g.kelly_half_pct)?" is-filled":""}"></div>`).join("")}</div>
+            </div>
+            <div class="sb-kelly-cell">
+              <span class="sb-detail-label">Suggested Bet (Half Kelly)</span>
+              <span class="sb-detail-value" style="color:var(--sb-purple)">${fKelly(g.kelly_half_pct)} of bankroll</span>
+            </div>
+            <div class="sb-kelly-cell">
+              <span class="sb-detail-label">Full Kelly</span>
+              <span class="sb-detail-value" style="color:var(--sb-muted)">${fKelly(g.kelly_full_pct)}</span>
+            </div>
+            <div class="sb-kelly-cell">
+              <span class="sb-detail-label">Signal Strength</span>
+              <span class="sb-detail-value" style="color:${kellyColor(g.kelly_edge)}">${kellyLabel(g.kelly_half_pct)}</span>
+            </div>
+          </div>
+        </div>
+        `:`<div class="sb-kelly-no-edge">No Kelly edge — model doesn't see enough value over the current odds to size a bet.</div>`}
+      </div>
+
+      <!-- VEGAS -->
+      <div class="sb-detail-panel sb-vegas-panel" data-panel="vegas">
+        <div class="sb-detail-grid">
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">${t(g.away_team)} Moneyline</span>
+            <span class="sb-detail-value is-blue">${fMl(g.vegas_moneyline_away)}</span>
+          </div>
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">${t(g.home_team)} Moneyline</span>
+            <span class="sb-detail-value is-blue">${fMl(g.vegas_moneyline_home)}</span>
+          </div>
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">Vegas Favorite</span>
+            <span class="sb-detail-value">${t(g.market_favorite)}</span>
+          </div>
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">Spread</span>
+            <span class="sb-detail-value">${tText(g.market_runline)||"--"}</span>
+          </div>
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">Over/Under Line</span>
+            <span class="sb-detail-value is-blue">${fN(g.vegas_total_line)}</span>
+          </div>
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">Spread Prices</span>
+            <span class="sb-detail-value">${t(g.away_team)} ${fMl(g.away_spread_price_american)} / ${t(g.home_team)} ${fMl(g.home_spread_price_american)}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPREAD & O/U -->
+      <div class="sb-detail-panel sb-spread-panel" data-panel="spread">
+        <div class="sb-detail-grid">
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">Spread Pick</span>
+            <span class="sb-detail-value is-gold">${tText(g.projected_runline_pick)||"--"}</span>
+          </div>
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">Spread Confidence</span>
+            <span class="sb-detail-value" style="color:${confColor(g.projected_runline_confidence_pct)}">${fP(g.projected_runline_confidence_pct)}</span>
+          </div>
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">Cover Probability</span>
+            <span class="sb-detail-value">${t(g.away_team)} ${fP(g.away_cover_prob?g.away_cover_prob*100:null)} / ${t(g.home_team)} ${fP(g.home_cover_prob?g.home_cover_prob*100:null)}</span>
+          </div>
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">Spread Edge</span>
+            <span class="sb-detail-value ${Number(g.projected_runline_edge)>0?"is-green":Number(g.projected_runline_edge)<0?"is-red":""}">${fSig(g.projected_runline_edge,2)||"--"}</span>
+          </div>
+          ${hasOU(g)?`
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">Over/Under Pick</span>
+            <span class="sb-detail-value is-gold">${g.projected_ou_pick} ${fN(g.vegas_total_line)}</span>
+          </div>
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">O/U Confidence</span>
+            <span class="sb-detail-value" style="color:${confColor(g.projected_ou_confidence_pct)}">${fP(g.projected_ou_confidence_pct)}</span>
+          </div>
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">Our Projected Total</span>
+            <span class="sb-detail-value">${fN(g.projected_total_runs,1)} runs</span>
+          </div>
+          <div class="sb-detail-cell">
+            <span class="sb-detail-label">Total Edge</span>
+            <span class="sb-detail-value ${Number(g.projected_total_edge)>0?"is-green":Number(g.projected_total_edge)<0?"is-red":""}">${fSig(g.projected_total_edge,1)} runs</span>
+          </div>
+          `:`
+          <div class="sb-detail-cell is-full">
+            <span class="sb-detail-label">Over/Under</span>
+            <span class="sb-detail-value" style="color:var(--sb-muted)">${g.vegas_total_line!=null?"Vegas line: "+fN(g.vegas_total_line)+" -- ":""}Model O/U picks are paused while we recalibrate</span>
+          </div>
+          `}
+        </div>
+      </div>
+    </div>
+  </article>`;
+}
+
+// ─── RENDER BOARD ───
+function renderBoard(games,recentGames){
+  const meta = state.data.meta;
+  const boardDate = meta?.boardDate;
+  const plusOne = boardDate?new Date(`${boardDate}T12:00:00`):null;
+  if(plusOne) plusOne.setDate(plusOne.getDate()+1);
+  const tmrwDate = plusOne?plusOne.toISOString().slice(0,10):null;
+
+  const todayGames = boardDate?games.filter(g=>(g.board_display_date||g.game_date)===boardDate):games;
+  const tmrwGames = tmrwDate?games.filter(g=>(g.board_display_date||g.game_date)===tmrwDate):[];
+
+  renderTabs(todayGames.length,tmrwGames.length,recentGames.length);
+
+  let list;
+  const resHead = document.getElementById("results-head");
+  const resBoard = document.getElementById("results-board");
+  const titleEl = document.getElementById("board-title");
+
+  if(state.day==="results"){
+    list=[];
+    document.getElementById("board").innerHTML="";
+    resHead.hidden=false;resBoard.hidden=false;
+    resBoard.innerHTML=recentGames.length?recentGames.map(g=>buildCard(g)).join(""):'<div class="sb-empty">No recent results yet.</div>';
+    titleEl.textContent="Today's Games";
+    return;
+  } else {
+    resHead.hidden=true;resBoard.hidden=true;
+    list = state.day==="tomorrow"?tmrwGames:todayGames;
+    titleEl.textContent = state.day==="tomorrow"?"Tomorrow's Games":"Today's Games";
+  }
+
+  // apply filter
+  const filtered = list.filter(g=>{
+    switch(state.filter){
+      case "best": return Number(g.is_go_play)===1;
+      case "spread": return g.runline_roi_play;
+      case "against": return g.model_vs_market==="DISAGREE";
+      case "hot": return g.moneyline_roi_play||g.runline_roi_play||g.total_roi_play;
+      default: return true;
+    }
+  });
+
+  const board = document.getElementById("board");
+  board.innerHTML = filtered.length?filtered.map(g=>buildCard(g)).join(""):'<div class="sb-empty">No games match this filter.</div>';
+}
+
+// ─── CARD INTERACTIONS ───
+document.addEventListener("click",e=>{
+  // expand/collapse
+  const head = e.target.closest(".sb-game-head");
+  if(head){
+    const pk = Number(head.dataset.pk);
+    state.expanded = state.expanded===pk?null:pk;
+    render();
+    return;
+  }
+  // sub-tabs
+  const subTab = e.target.closest(".sb-sub-tab");
+  if(subTab){
+    const card = subTab.closest(".sb-game");
+    card.querySelectorAll(".sb-sub-tab").forEach(t=>t.classList.toggle("is-active",t===subTab));
+    card.querySelectorAll(".sb-detail-panel").forEach(p=>p.classList.toggle("is-active",p.dataset.panel===subTab.dataset.sub));
+  }
+});
+
+// ─── RENDER ACCURACY ───
+function renderAccuracy(acc){
+  if(!acc)return;
+  document.getElementById("accuracy-sub").textContent=`${acc.season} -- ${acc.gradedGames} games graded`;
+  const grid = document.getElementById("accuracy-grid");
+  const lanes = [
+    {key:"moneyline",label:"Moneyline",color:"var(--sb-green)"},
+    {key:"runline",label:"Spread",color:"var(--sb-gold)"},
+    {key:"total",label:"Over/Under",color:"var(--sb-blue)"}
+  ];
+  grid.innerHTML = lanes.map(l=>{
+    const lane = acc.lanes?.[l.key];
+    if(!lane)return"";
+    const pct = lane.accuracyPct||0;
+    return `<div class="sb-accuracy-card">
+      <span class="sb-accuracy-label">${l.label}</span>
+      <span class="sb-accuracy-pct" style="color:${l.color}">${fP(pct)}</span>
+      <span class="sb-accuracy-record">${lane.correct}/${lane.gradedGames}${lane.pushes?` (${lane.pushes} push${lane.pushes===1?"":"es"})`:""}</span>
+      <div class="sb-accuracy-bar"><div class="sb-accuracy-fill" style="width:${pct}%;background:${l.color}"></div></div>
+    </div>`;
+  }).join("");
+}
+
+// ─── CHAT ───
+const chatBtn = document.getElementById("chat-btn");
+const chatPanel = document.getElementById("chat-panel");
+const chatClose = document.getElementById("chat-close");
+const chatBody = document.getElementById("chat-body");
+const chatInput = document.getElementById("chat-input");
+const chatSend = document.getElementById("chat-send");
+const chatPrompts = document.getElementById("chat-prompts");
+
+chatBtn.onclick = ()=>{chatPanel.classList.add("is-open")};
+chatClose.onclick = ()=>{chatPanel.classList.remove("is-open")};
+
+function addMsg(text,isUser=false){
+  const div = document.createElement("div");
+  div.className = `sb-chat-msg ${isUser?"sb-chat-msg-user":"sb-chat-msg-ai"}`;
+  div.innerHTML = text;
+  chatBody.appendChild(div);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+// ─── TEAM NAME ALIASES for fuzzy matching ───
+const TEAM_ALIASES = {
+  PHI:["phillies","philly","phi"],NYY:["yankees","yanks","nyy","bronx bombers"],NYM:["mets","nym"],
+  BOS:["red sox","redsox","boston","bos"],LAD:["dodgers","lad","la dodgers","los angeles dodgers"],LAN:["dodgers","lad"],
+  CHC:["cubs","chc","chicago cubs"],CHN:["cubs","chc"],CWS:["white sox","whitesox","cws","chi sox"],CHA:["white sox","whitesox","cws"],
+  STL:["cardinals","cards","stl","st louis"],SLN:["cardinals","cards","stl"],
+  SF:["giants","sf","san francisco"],SFN:["giants","sf"],SD:["padres","sd","san diego"],SDN:["padres","sd"],
+  MIL:["brewers","mil","milwaukee"],ATL:["braves","atl","atlanta"],
+  HOU:["astros","hou","houston"],TEX:["rangers","tex","texas"],
+  SEA:["mariners","sea","seattle"],LAA:["angels","laa","la angels","anaheim"],ANA:["angels","laa"],
+  MIN:["twins","min","minnesota"],DET:["tigers","det","detroit"],CLE:["guardians","cle","cleveland"],
+  KC:["royals","kc","kansas city"],KCA:["royals","kc"],
+  TB:["rays","tb","tampa","tampa bay"],TBA:["rays","tb"],BAL:["orioles","bal","baltimore","o's"],
+  TOR:["blue jays","bluejays","tor","toronto","jays"],
+  WSH:["nationals","nats","wsh","washington"],WAS:["nationals","nats","wsh"],
+  ARI:["diamondbacks","dbacks","ari","arizona","d-backs"],AZ:["diamondbacks","dbacks","ari"],
+  PIT:["pirates","pit","pittsburgh"],CIN:["reds","cin","cincinnati"],
+  MIA:["marlins","mia","miami"],COL:["rockies","col","colorado"],
+  OAK:["athletics","a's","oak","oakland"],ATH:["athletics","a's","oak"]
+};
+
+function findTeamGame(q, games) {
+  // Word-boundary-safe match helper
+  const wb = (haystack, needle) => new RegExp(`\\b${needle.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`,'i').test(haystack);
+  // First try direct team code match (3-letter codes need word boundary)
+  for (const g of games) {
+    const codes = [t(g.away_team), t(g.home_team)];
+    for (const c of codes) {
+      if (c && wb(q, c)) return g;
+    }
+  }
+  // Then try aliases (multi-word aliases like "red sox" use includes, short ones use word boundary)
+  for (const g of games) {
+    for (const code of [g.away_team, g.home_team]) {
+      const aliases = TEAM_ALIASES[code] || TEAM_ALIASES[t(code)] || [];
+      for (const alias of aliases) {
+        if (alias.length <= 3) { if (wb(q, alias)) return g; }
+        else { if (q.includes(alias)) return g; }
+      }
+    }
+  }
+  return null;
+}
+
+function gameBreakdown(g) {
+  const conf = g.projected_confidence_pct;
+  const margin = Math.abs(g.projected_score_diff || 0);
+  const pickedOdds = g.projected_winner_side==="home"?g.vegas_moneyline_home:g.vegas_moneyline_away;
+  const dogOdds = g.projected_winner_side==="home"?g.vegas_moneyline_away:g.vegas_moneyline_home;
+  const isDisagree = g.model_vs_market==="DISAGREE";
+  const isBest = Number(g.is_go_play)===1;
+  const isPass = Number(g.is_stay_away)===1;
+
+  // Build a genuine analysis paragraph, not just data dump
+  let analysis = "";
+
+  // Verdict
+  if (isBest) {
+    analysis += `This is one of our <strong>Best Bets</strong> today. `;
+  } else if (isPass) {
+    analysis += `We'd recommend <strong>passing</strong> on this one. `;
+  }
+
+  // Winner analysis
+  if (conf >= 72) {
+    analysis += `We're highly confident in <strong>${t(g.projected_winner)}</strong> at ${fP(conf)}. `;
+  } else if (conf >= 60) {
+    analysis += `We lean <strong>${t(g.projected_winner)}</strong> at ${fP(conf)} confidence -- solid but not a lock. `;
+  } else {
+    analysis += `This is a close game. We slightly favor <strong>${t(g.projected_winner)}</strong> at just ${fP(conf)}. `;
+  }
+
+  // Score context
+  analysis += `We project <strong>${t(g.away_team)} ${fN(g.projected_away_runs)} - ${t(g.home_team)} ${fN(g.projected_home_runs)}</strong>`;
+  if (margin >= 1.5) {
+    analysis += ` -- that's a comfortable ${fSig(g.projected_score_diff,1)} run margin. `;
+  } else if (margin >= 0.75) {
+    analysis += ` -- a decent ${fSig(g.projected_score_diff,1)} run margin. `;
+  } else {
+    analysis += ` -- barely ${fSig(g.projected_score_diff,2)} runs apart, so this could go either way. `;
+  }
+
+  // Vegas comparison
+  if (isDisagree) {
+    analysis += `<br><br>Interesting wrinkle: <strong>Vegas has ${t(g.market_favorite)} as the favorite</strong> but our model disagrees. `;
+    analysis += `That kind of disagreement can signal hidden value, but also means more volatility. `;
+  } else {
+    analysis += `Vegas and our model agree that ${t(g.market_favorite)} is the favorite (${fMl(pickedOdds)}). `;
+  }
+
+  // Track record
+  if (g.historical_bucket_accuracy_pct) {
+    const trackPct = g.historical_bucket_accuracy_pct;
+    analysis += `In ${g.historical_bucket_games} historically similar spots, this type of pick has hit <strong>${fP(trackPct)}</strong> of the time`;
+    if (trackPct >= 65) analysis += ` -- that's a strong track record.`;
+    else if (trackPct >= 58) analysis += ` -- decent historical backing.`;
+    else analysis += ` -- not the strongest history.`;
+  }
+
+  // Spread
+  if (g.projected_runline_pick) {
+    analysis += `<br><br><strong>Spread:</strong> ${tText(g.projected_runline_pick)} at ${fP(g.projected_runline_confidence_pct)} confidence.`;
+    const rlEdge = Number(g.projected_runline_edge);
+    if (!isNaN(rlEdge) && rlEdge !== 0) {
+      analysis += rlEdge > 0 ? ` Positive edge of ${fSig(rlEdge,2)} -- the spread looks favorable.` : ` Negative edge of ${fSig(rlEdge,2)} -- the spread is tight.`;
+    }
+  }
+
+  // O/U
+  if (hasOU(g)) {
+    analysis += `<br><strong>Over/Under:</strong> We like the ${g.projected_ou_pick} on a ${fN(g.vegas_total_line)} line (${fP(g.projected_ou_confidence_pct)} confident).`;
+  } else if (g.vegas_total_line != null) {
+    analysis += `<br><strong>O/U Line:</strong> Vegas has it at ${fN(g.vegas_total_line)}. Our O/U model is paused for recalibration.`;
+  }
+
+  // Moneyline value
+  analysis += `<br><br><strong>Lines:</strong> ${t(g.away_team)} ${fMl(g.vegas_moneyline_away)} / ${t(g.home_team)} ${fMl(g.vegas_moneyline_home)}`;
+
+  // Bottom line
+  analysis += `<br><br><strong>Bottom line:</strong> `;
+  if (isBest && conf >= 70) {
+    analysis += `Strong play. The confidence is high, the model and history back it. Worth a look on the moneyline.`;
+  } else if (isBest) {
+    analysis += `Good setup. Not the highest confidence, but the edge profile is right.`;
+  } else if (isPass) {
+    analysis += `Not enough separation to justify a bet. Too close to a coin flip.`;
+  } else if (conf >= 65 && margin >= 1.0) {
+    analysis += `Not a featured pick but the numbers look solid. Could be worth a play.`;
+  } else if (isDisagree) {
+    analysis += `Contrarian spot -- if you believe the model over the market, there could be value here. Higher risk though.`;
+  } else {
+    analysis += `Decent lean but nothing screaming "bet this." Consider it if the price is right.`;
+  }
+
+  return analysis;
+}
+
+function buildParlayAnalysis(games, legs) {
+  let resp = `<strong>Parlay Breakdown (${legs} legs):</strong><br><br>`;
+  const pool = games.filter(g=>(g.vegas_moneyline_home!=null||g.vegas_moneyline_away!=null));
+  const sorted = [...pool].sort((a,b)=>(b.projected_confidence_pct||0)-(a.projected_confidence_pct||0));
+  const tops = sorted.slice(0, Math.min(legs, sorted.length));
+  if (tops.length < 2) return "Not enough games with odds data to build a parlay today.";
+
+  let combined = 1;
+  let minConf = 100;
+  tops.forEach((g,i)=>{
+    const odds = g.projected_winner_side==="home"?g.vegas_moneyline_home:g.vegas_moneyline_away;
+    if(odds!=null&&odds!==0){const decimal=odds>0?(odds/100+1):(100/Math.abs(odds)+1);combined*=decimal}
+    minConf = Math.min(minConf, g.projected_confidence_pct||0);
+    const isBest = Number(g.is_go_play)===1;
+    resp+=`<strong>Leg ${i+1}: ${t(g.projected_winner)} ML (${fMl(odds)})</strong><br>`;
+    resp+=`${t(g.away_team)} @ ${t(g.home_team)} -- ${fP(g.projected_confidence_pct)} confident`;
+    resp+=isBest?' -- Best Bet':'';
+    resp+=`<br>Projected: ${fN(g.projected_away_runs)}-${fN(g.projected_home_runs)} (margin ${fSig(g.projected_score_diff,1)})<br><br>`;
+  });
+  const parlayOdds = combined>1?Math.round((combined-1)*100):0;
+  resp+=`<strong>Combined odds: +${parlayOdds}</strong><br>`;
+
+  // Risk assessment
+  resp+=`<br><strong>Risk assessment:</strong> `;
+  if (minConf >= 70) {
+    resp+=`All legs are high confidence (lowest: ${fP(minConf)}). This is about as safe as parlays get -- but remember, one loss kills the whole ticket.`;
+  } else if (minConf >= 60) {
+    resp+=`Mostly solid confidence (lowest leg: ${fP(minConf)}). Reasonable risk for a ${legs}-leg parlay.`;
+  } else {
+    resp+=`The weakest leg is only at ${fP(minConf)} -- that makes this parlay riskier. Consider dropping that leg or going with fewer legs.`;
+  }
+
+  // Alternative suggestion
+  if (legs >= 3) {
+    const safe2 = sorted.slice(0,2);
+    let c2 = 1;
+    safe2.forEach(g=>{
+      const odds = g.projected_winner_side==="home"?g.vegas_moneyline_home:g.vegas_moneyline_away;
+      if(odds!=null&&odds!==0){const decimal=odds>0?(odds/100+1):(100/Math.abs(odds)+1);c2*=decimal}
+    });
+    resp+=`<br><br><em>Safer alternative: A 2-leg parlay with just ${t(safe2[0].projected_winner)} + ${t(safe2[1].projected_winner)} pays +${Math.round((c2-1)*100)} with less risk.</em>`;
+  }
+  return resp;
+}
+
+function generateAIResponse(query){
+  const games = state.data?.games||[];
+  const featured = state.data?.featured||[];
+  const accuracy = state.data?.accuracy;
+  const q = query.toLowerCase().trim();
+
+  if(!games.length) return "No games loaded yet. The board might still be refreshing.";
+
+  // ─── TEAM-SPECIFIC QUESTIONS (only when clearly asking about a specific team) ───
+  const teamGame = findTeamGame(q, games);
+  const isTeamQuestion = teamGame && (q.includes("break")||q.includes("tell me about")||q.includes("what about")||q.includes("how about")||q.includes("analyze")||q.includes("analysis")||q.includes("think about")||q.match(/\b(game|matchup|match)\b/));
+  if(isTeamQuestion) {
+    return gameBreakdown(teamGame);
+  }
+
+  // ─── PARLAY QUESTIONS ───
+  if(q.includes("parlay")||q.includes("combo")||q.includes("multi")||q.includes("accumulator")){
+    // Check if they asked for a specific number of legs
+    const legMatch = q.match(/(\d+)\s*(?:leg|team|pick|game)/);
+    const legs = legMatch ? parseInt(legMatch[1]) : 3;
+    return buildParlayAnalysis(games, Math.min(Math.max(legs, 2), 6));
+  }
+
+  // ─── EDGE / VALUE QUESTIONS ───
+  if(q.includes("edge")||q.includes("value")||q.includes("strongest")||q.includes("best value")||q.includes("biggest")){
+    const sorted = [...games].sort((a,b)=>Math.abs(b.projected_score_diff||0)-Math.abs(a.projected_score_diff||0)).slice(0,3);
+    let resp = "<strong>Games with the Biggest Edge Today:</strong><br><br>";
+    sorted.forEach((g,i)=>{
+      const isBest = Number(g.is_go_play)===1;
+      const isDisagree = g.model_vs_market==="DISAGREE";
+      resp+=`<strong>${i+1}. ${t(g.away_team)} @ ${t(g.home_team)}</strong>`;
+      if(isBest) resp+=' <span style="color:var(--sb-green)">[Best Bet]</span>';
+      if(isDisagree) resp+=' <span style="color:var(--sb-gold)">[Against Vegas]</span>';
+      resp+=`<br>`;
+      resp+=`Pick: ${t(g.projected_winner)} (${fP(g.projected_confidence_pct)}) -- Margin: ${fSig(g.projected_score_diff,2)} runs<br>`;
+      resp+=`Track record: ${fP(g.historical_bucket_accuracy_pct)} in ${g.historical_bucket_games} similar spots<br>`;
+      resp+=`Moneyline: ${fMl(g.projected_winner_side==="home"?g.vegas_moneyline_home:g.vegas_moneyline_away)}<br><br>`;
+    });
+    resp+=`<em>Edge is measured by how far our projected score separates the teams. Bigger margin = more cushion for our pick to be right.</em>`;
+    return resp;
+  }
+
+  // ─── SAFE / CONFIDENT / SURE THING ───
+  if(q.includes("safe")||q.includes("confident")||q.includes("sure")||q.includes("lock")||q.includes("reliable")||q.includes("guarantee")){
+    const sorted = [...games].sort((a,b)=>(b.projected_confidence_pct||0)-(a.projected_confidence_pct||0));
+    const top3 = sorted.slice(0,3);
+    let resp = "<strong>Most Confident Picks Today:</strong><br><br>";
+    top3.forEach((g,i)=>{
+      resp+=`<strong>${i+1}. ${t(g.projected_winner)}</strong> (${t(g.away_team)} @ ${t(g.home_team)})<br>`;
+      resp+=`Confidence: ${fP(g.projected_confidence_pct)} -- ${fMl(g.projected_winner_side==="home"?g.vegas_moneyline_home:g.vegas_moneyline_away)}<br>`;
+      resp+=`Track record: ${fP(g.historical_bucket_accuracy_pct)} in similar spots<br><br>`;
+    });
+    resp+=`<em>No bet is ever truly "safe" -- but these are the picks where our model sees the clearest separation. The top pick at ${fP(top3[0].projected_confidence_pct)} has hit ${fP(top3[0].historical_bucket_accuracy_pct)} historically in similar setups.</em>`;
+    return resp;
+  }
+
+  // ─── SPREAD / RUNLINE ───
+  if(q.includes("spread")||q.includes("runline")||q.includes("cover")||q.includes("+1.5")||q.includes("-1.5")){
+    const rlCard = featured.find(f=>f.card_type==="go_play_runline");
+    const spreadGames = [...games].filter(g=>g.projected_runline_pick).sort((a,b)=>(b.projected_runline_confidence_pct||0)-(a.projected_runline_confidence_pct||0));
+    let resp = "<strong>Spread Analysis:</strong><br><br>";
+    if (rlCard) {
+      const matchGame = games.find(g=>g.gamePk===rlCard.gamePk);
+      const g = matchGame?{...matchGame,...rlCard}:rlCard;
+      resp+=`<strong>Featured Spread Play: ${tText(g.card_title||g.projected_runline_pick)}</strong><br>`;
+      resp+=`${t(g.away_team)} @ ${t(g.home_team)} -- ${fP(g.projected_runline_confidence_pct||g.confidence_score_pct)} confident<br>`;
+      if(g.body_text) resp+=`${tText(g.body_text)}<br>`;
+      resp+=`<br>`;
+    }
+    const top3 = spreadGames.slice(0,3);
+    resp+=`<strong>Top spread picks by confidence:</strong><br>`;
+    top3.forEach((g,i)=>{
+      const rlEdge = Number(g.projected_runline_edge);
+      resp+=`${i+1}. <strong>${tText(g.projected_runline_pick)}</strong> -- ${fP(g.projected_runline_confidence_pct)}`;
+      if (!isNaN(rlEdge)&&rlEdge!==0) resp+=` (edge: ${fSig(rlEdge,2)})`;
+      resp+=`<br>`;
+    });
+    resp+=`<br><em>Spread bets (aka runline in baseball) are +1.5 or -1.5 runs. Betting the underdog +1.5 means they can lose by 1 and you still win. Usually better value than moneyline for close games.</em>`;
+    return resp;
+  }
+
+  // ─── AGAINST VEGAS / CONTRARIAN / FADE ───
+  if(q.includes("against")||q.includes("disagree")||q.includes("fade")||q.includes("contrarian")||q.includes("upset")||q.includes("underdog")){
+    const disagrees = games.filter(g=>g.model_vs_market==="DISAGREE");
+    if(!disagrees.length) return "Our model agrees with Vegas on every game today. No contrarian plays to highlight. That's actually pretty rare -- usually there are at least 1-2 disagreements.";
+    let resp = `<strong>Against the Line -- ${disagrees.length} Contrarian Pick${disagrees.length>1?"s":""}:</strong><br><br>`;
+    disagrees.forEach(g=>{
+      const conf = g.projected_confidence_pct;
+      resp+=`<strong>${t(g.away_team)} @ ${t(g.home_team)}</strong><br>`;
+      resp+=`Vegas favorite: ${t(g.market_favorite)} -- Our pick: <strong>${t(g.projected_winner)}</strong> (${fP(conf)})<br>`;
+      resp+=`Projected: ${fN(g.projected_away_runs)}-${fN(g.projected_home_runs)} (margin ${fSig(g.projected_score_diff,2)})<br>`;
+      if (conf >= 65) resp+=`<em>Higher conviction disagree -- the model is fairly confident here.</em><br>`;
+      else resp+=`<em>Low conviction -- more of a lean than a strong disagree.</em><br>`;
+      resp+=`<br>`;
+    });
+    resp+=`<em>Contrarian plays have higher variance. They can offer great value when the market overreacts, but they're wrong more often than consensus picks. Size your bets accordingly.</em>`;
+    return resp;
+  }
+
+  // ─── OVER / UNDER / TOTALS ───
+  if(q.includes("over")||q.includes("under")||q.includes("total")||q.includes("o/u")||q.includes("runs scored")){
+    const withOU = games.filter(g=>hasOU(g));
+    if(!withOU.length){
+      let resp = "<strong>Over/Under Status:</strong><br><br>";
+      resp+=`Our O/U model is currently <strong>paused for recalibration</strong>. It was hitting around 49% accuracy in 2026 with an 88% UNDER bias, so we pulled it until it's fixed.<br><br>`;
+      resp+=`Vegas total lines are still available on each game card for reference. `;
+      const highLine = [...games].filter(g=>g.vegas_total_line!=null).sort((a,b)=>(b.vegas_total_line||0)-(a.vegas_total_line||0))[0];
+      const lowLine = [...games].filter(g=>g.vegas_total_line!=null).sort((a,b)=>(a.vegas_total_line||0)-(b.vegas_total_line||0))[0];
+      if(highLine&&lowLine){
+        resp+=`Today's range: ${fN(lowLine.vegas_total_line)} (${t(lowLine.away_team)}@${t(lowLine.home_team)}) to ${fN(highLine.vegas_total_line)} (${t(highLine.away_team)}@${t(highLine.home_team)}).`;
+      }
+      return resp;
+    }
+    let resp = "<strong>Over/Under Picks:</strong><br><br>";
+    const sorted = withOU.sort((a,b)=>(b.projected_ou_confidence_pct||0)-(a.projected_ou_confidence_pct||0)).slice(0,3);
+    sorted.forEach((g,i)=>{
+      resp+=`${i+1}. <strong>${g.projected_ou_pick} ${fN(g.vegas_total_line)}</strong> -- ${t(g.away_team)} @ ${t(g.home_team)} (${fP(g.projected_ou_confidence_pct)})<br>`;
+    });
+    return resp;
+  }
+
+  // ─── HOW'S THE MODEL DOING / ACCURACY / RECORD ───
+  if(q.includes("accuracy")||q.includes("record")||q.includes("how.*(model|you|we).*(doing|performing)")||q.includes("track record")||q.includes("season")||q.includes("stats")||q.includes("performance")){
+    if(!accuracy) return "Season stats aren't loaded yet.";
+    const ml = accuracy.lanes?.moneyline;
+    const rl = accuracy.lanes?.runline;
+    const ou = accuracy.lanes?.total;
+    let resp = `<strong>${accuracy.season} Performance:</strong><br><br>`;
+    resp+=`<strong>Moneyline:</strong> ${ml?`${ml.correct}/${ml.gradedGames} (${fP(ml.accuracyPct)})`:"--"}<br>`;
+    resp+=`<strong>Spread:</strong> ${rl?`${rl.correct}/${rl.gradedGames} (${fP(rl.accuracyPct)})`:"--"}<br>`;
+    resp+=`<strong>Over/Under:</strong> ${ou?`${ou.correct}/${ou.gradedGames} (${fP(ou.accuracyPct)})${ou.pushes?` + ${ou.pushes} pushes`:""}`:"--"}<br><br>`;
+    if (ml && ml.accuracyPct > 54) {
+      resp+=`The moneyline model is beating break-even (which is roughly 52.4% for -110 juice). `;
+    }
+    if (rl && rl.accuracyPct > 54) {
+      resp+=`Spread picks are also solid. `;
+    }
+    if (ou && ou.accuracyPct < 52) {
+      resp+=`O/U has been struggling -- that's why we've paused those picks while we recalibrate.`;
+    }
+    return resp;
+  }
+
+  // ─── WHAT SHOULD I BET / RECOMMEND / BEST BET ───
+  if(q.includes("what should")||q.includes("recommend")||q.includes("best bet")||q.includes("today")||q.includes("what do you")||q.includes("suggestion")||q.includes("what's good")){
+    const bestBets = games.filter(g=>Number(g.is_go_play)===1).sort((a,b)=>(b.projected_confidence_pct||0)-(a.projected_confidence_pct||0));
+    const topConf = [...games].sort((a,b)=>(b.projected_confidence_pct||0)-(a.projected_confidence_pct||0))[0];
+    let resp = "<strong>Today's Board Summary:</strong><br><br>";
+    resp+=`${games.length} games on the board. `;
+    resp+=`${bestBets.length} Best Bet${bestBets.length!==1?"s":""}. `;
+    const disagreeCount = games.filter(g=>g.model_vs_market==="DISAGREE").length;
+    if(disagreeCount) resp+=`${disagreeCount} game${disagreeCount!==1?"s":""} where we disagree with Vegas. `;
+    resp+=`<br><br>`;
+    if(bestBets.length){
+      resp+=`<strong>Best Bets:</strong><br>`;
+      bestBets.forEach(g=>{
+        resp+=`-- <strong>${t(g.projected_winner)}</strong> (${t(g.away_team)} @ ${t(g.home_team)}) at ${fP(g.projected_confidence_pct)} -- ${fMl(g.projected_winner_side==="home"?g.vegas_moneyline_home:g.vegas_moneyline_away)}<br>`;
+      });
+      resp+=`<br>`;
+    }
+    if(topConf){
+      resp+=`<strong>Highest confidence pick:</strong> ${t(topConf.projected_winner)} at ${fP(topConf.projected_confidence_pct)} in ${t(topConf.away_team)} @ ${t(topConf.home_team)}.<br><br>`;
+    }
+    resp+=`Ask me about any specific game for a deeper breakdown, or say "parlay" for combo suggestions.`;
+    return resp;
+  }
+
+  // ─── CLOSE GAMES / TOSS UPS ───
+  if(q.includes("close")||q.includes("toss up")||q.includes("coin flip")||q.includes("avoid")||q.includes("skip")||q.includes("stay away")||q.includes("pass")){
+    const closeGames = [...games].filter(g=>(g.projected_confidence_pct||0)<58).sort((a,b)=>(a.projected_confidence_pct||0)-(b.projected_confidence_pct||0));
+    const passGames = games.filter(g=>Number(g.is_stay_away)===1);
+    let resp = "<strong>Games to Be Careful With:</strong><br><br>";
+    if(passGames.length){
+      resp+=`<strong>Marked as Pass (${passGames.length}):</strong><br>`;
+      passGames.forEach(g=>{
+        resp+=`-- ${t(g.away_team)} @ ${t(g.home_team)} -- Only ${fP(g.projected_confidence_pct)} confident, margin just ${fSig(g.projected_score_diff,2)} runs<br>`;
+      });
+      resp+=`<br>`;
+    }
+    if(closeGames.length){
+      resp+=`<strong>Close calls (under 58% confidence):</strong><br>`;
+      closeGames.slice(0,5).forEach(g=>{
+        resp+=`-- ${t(g.away_team)} @ ${t(g.home_team)} (${fP(g.projected_confidence_pct)}) -- ${fSig(g.projected_score_diff,2)} run margin<br>`;
+      });
+    }
+    resp+=`<br><em>Low confidence doesn't mean these teams won't win -- it means we don't have enough edge to recommend betting on them.</em>`;
+    return resp;
+  }
+
+  // ─── HOW MANY GAMES / BOARD OVERVIEW ───
+  if(q.includes("how many")||q.includes("games today")||q.includes("board")||q.includes("slate")||q.includes("schedule")){
+    const meta = state.data?.meta;
+    let resp = `<strong>Board Overview:</strong><br><br>`;
+    resp+=`<strong>${games.length} games</strong> on today's slate.<br>`;
+    const bestCount = games.filter(g=>Number(g.is_go_play)===1).length;
+    const passCount = games.filter(g=>Number(g.is_stay_away)===1).length;
+    const disagreeCount = games.filter(g=>g.model_vs_market==="DISAGREE").length;
+    const hotCount = games.filter(g=>g.moneyline_roi_play||g.runline_roi_play).length;
+    resp+=`${bestCount} Best Bet${bestCount!==1?"s":""} | ${passCount} Pass | ${disagreeCount} Against Vegas | ${hotCount} Hot Zone<br><br>`;
+    // Confidence distribution
+    const high = games.filter(g=>(g.projected_confidence_pct||0)>=72).length;
+    const mid = games.filter(g=>(g.projected_confidence_pct||0)>=60&&(g.projected_confidence_pct||0)<72).length;
+    const low = games.filter(g=>(g.projected_confidence_pct||0)<60).length;
+    resp+=`<strong>Confidence breakdown:</strong><br>`;
+    resp+=`High (72%+): ${high} games<br>Mid (60-71%): ${mid} games<br>Low (&lt;60%): ${low} games<br>`;
+    if(meta?.generatedAt) resp+=`<br>Last updated: ${new Date(meta.generatedAt).toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})}`;
+    return resp;
+  }
+
+  // ─── TEAM MATCH (fallback -- just mentioning a team without a clear question) ───
+  if(teamGame) {
+    return gameBreakdown(teamGame);
+  }
+
+  // ─── SMART FALLBACK -- actually analyze the board instead of a generic help message ───
+  const topPick = [...games].sort((a,b)=>(b.projected_confidence_pct||0)-(a.projected_confidence_pct||0))[0];
+  const bestBets = games.filter(g=>Number(g.is_go_play)===1);
+  let resp = `I'm not sure exactly what you're asking, but here's a quick read on today's board:<br><br>`;
+  resp+=`<strong>${games.length} games</strong> today. `;
+  if(bestBets.length) resp+=`${bestBets.length} Best Bet${bestBets.length!==1?"s":""}. `;
+  if(topPick) resp+=`Highest confidence: <strong>${t(topPick.projected_winner)}</strong> at ${fP(topPick.projected_confidence_pct)} in ${t(topPick.away_team)} @ ${t(topPick.home_team)}.<br><br>`;
+  resp+=`Try asking me things like:<br>`;
+  resp+=`-- "Break down the ${t(topPick?.away_team)} game"<br>`;
+  resp+=`-- "Build me a 3-leg parlay"<br>`;
+  resp+=`-- "Which games should I avoid?"<br>`;
+  resp+=`-- "What's the safest bet today?"<br>`;
+  resp+=`-- "How's the model doing this season?"<br>`;
+  resp+=`-- "Any underdog plays?"`;
+  return resp;
+}
+
+function buildBoardContext(){
+  const d = state.data;
+  if(!d) return "No board data loaded.";
+  const meta = d.meta||{};
+  const acc = d.accuracy||{};
+  const games = d.games||[];
+  const featured = d.featured||[];
+
+  // Build a concise but complete board summary for Claude
+  let ctx = `Board date: ${meta.boardDate}\n`;
+  ctx+=`Games: ${games.length} | Generated: ${meta.generatedAt}\n`;
+  ctx+=`\nSEASON ACCURACY (${acc.gradedGames} graded):\n`;
+  const ml=acc.lanes?.moneyline; const rl=acc.lanes?.runline; const ou=acc.lanes?.total;
+  if(ml) ctx+=`Moneyline: ${ml.correct}/${ml.gradedGames} (${ml.accuracyPct}%)\n`;
+  if(rl) ctx+=`Spread: ${rl.correct}/${rl.gradedGames} (${rl.accuracyPct}%)\n`;
+  if(ou) ctx+=`O/U: ${ou.correct}/${ou.gradedGames} (${ou.accuracyPct}%) [PAUSED - unreliable]\n`;
+
+  ctx+=`\nFEATURED PICKS:\n`;
+  featured.forEach(f=>{
+    ctx+=`- ${f.card_type}: ${tText(f.card_title)} (${t(f.away_team)}@${t(f.home_team)}) conf=${f.confidence_score_pct}% | ${tText(f.body_text||"")}\n`;
+  });
+
+  ctx+=`\nALL GAMES:\n`;
+  games.forEach(g=>{
+    const pickedOdds = g.projected_winner_side==="home"?g.vegas_moneyline_home:g.vegas_moneyline_away;
+    ctx+=`${t(g.away_team)}@${t(g.home_team)} | Pick:${t(g.projected_winner)} conf=${g.projected_confidence_pct}% | `;
+    ctx+=`Score:${fN(g.projected_away_runs)}-${fN(g.projected_home_runs)} margin=${fSig(g.projected_score_diff,2)} | `;
+    ctx+=`ML:${fMl(g.vegas_moneyline_away)}/${fMl(g.vegas_moneyline_home)} | `;
+    ctx+=`Spread:${tText(g.projected_runline_pick)||"--"} conf=${fP(g.projected_runline_confidence_pct)} edge=${fSig(g.projected_runline_edge,2)} | `;
+    ctx+=`VegasTotal:${fN(g.vegas_total_line)} | `;
+    ctx+=`Track:${fP(g.historical_bucket_accuracy_pct)} in ${g.historical_bucket_games||"--"} games | `;
+    ctx+=`Tier:${g.edge_tier_label||"--"} | vsVegas:${g.model_vs_market} | `;
+    ctx+=`Flags:${Number(g.is_go_play)===1?"BEST_BET ":""}${Number(g.is_stay_away)===1?"PASS ":""}${g.moneyline_roi_play?"ML_HOT ":""}${g.runline_roi_play?"RL_HOT ":""}`;
+    ctx+=`\n`;
+  });
+  return ctx;
+}
+
+async function callClaudeAPI(question){
+  try{
+    const resp = await fetch("/api/chat",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({question, boardContext:buildBoardContext()})
+    });
+    if(!resp.ok){
+      const err = await resp.json().catch(()=>({}));
+      console.error("API error:",err);
+      return null; // fall back to local
+    }
+    const data = await resp.json();
+    return data.response || null;
+  }catch(e){
+    console.error("Chat fetch error:",e);
+    return null;
+  }
+}
+
+let useAPI = true; // try API first, fall back to local
+
+async function handleChat(){
+  const val = chatInput.value.trim();
+  if(!val)return;
+  addMsg(val,true);
+  chatInput.value="";
+
+  if(useAPI){
+    // Show typing indicator
+    const typing = document.createElement("div");
+    typing.className="sb-chat-msg sb-chat-msg-ai";
+    typing.id="chat-typing";
+    typing.innerHTML='<em style="color:var(--sb-muted)">Analyzing the board...</em>';
+    chatBody.appendChild(typing);
+    chatBody.scrollTop=chatBody.scrollHeight;
+
+    const apiResp = await callClaudeAPI(val);
+    const typingEl = document.getElementById("chat-typing");
+    if(typingEl) typingEl.remove();
+
+    if(apiResp){
+      // Convert markdown-style formatting to HTML
+      let formatted = apiResp
+        .replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>")
+        .replace(/\n/g,"<br>");
+      addMsg(formatted);
+      return;
+    }
+    // API failed -- fall back to local and stop trying API
+    useAPI = false;
+    console.log("API unavailable, switching to local analysis");
+  }
+
+  // Local fallback
+  addMsg(generateAIResponse(val));
+}
+chatSend.onclick=handleChat;
+chatInput.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();handleChat()}};
+
+function renderChatPrompts(){
+  const games = state.data?.games||[];
+  const featured = state.data?.featured||[];
+  const topGame = games.find(g=>Number(g.is_go_play)===1);
+  const rlCard = featured.find(f=>f.card_type==="go_play_runline");
+  const prompts = [
+    "Best parlay for today?",
+    "What's the safest bet?",
+    rlCard?`Tell me about the ${tText(rlCard.card_title)} spread play`:"Biggest edge games",
+    topGame?`Break down ${t(topGame.away_team)} @ ${t(topGame.home_team)}`:"Against Vegas picks"
+  ];
+  chatPrompts.innerHTML = prompts.map(p=>`<button class="sb-chat-prompt">${p}</button>`).join("");
+  chatPrompts.querySelectorAll(".sb-chat-prompt").forEach(btn=>{
+    btn.onclick=()=>{addMsg(btn.textContent,true);setTimeout(()=>addMsg(generateAIResponse(btn.textContent)),400)};
+  });
+}
+
+// ─── BOTTOM NAV ───
+document.querySelectorAll(".sb-nav-item").forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll(".sb-nav-item").forEach(b=>b.classList.remove("is-active"));
+    btn.classList.add("is-active");
+    const nav = btn.dataset.nav;
+    if(nav==="ai"){chatPanel.classList.add("is-open");return}
+    if(nav==="best"){state.filter="best";state.day="today";render();document.getElementById("board").scrollIntoView({behavior:"smooth"});return}
+    if(nav==="stats"){document.getElementById("accuracy-section").scrollIntoView({behavior:"smooth"});return}
+    if(nav==="board"){state.filter="all";state.day="today";render();window.scrollTo({top:0,behavior:"smooth"})}
+  };
+});
+
+// ─── MAIN RENDER ───
+function render(){
+  if(!state.data)return;
+  const d = state.data;
+  renderHeader(d.meta,d.accuracy);
+  renderHero(d.featured,d.games);
+  renderFilters();
+  renderBoard(d.games||[],d.recentGames||[]);
+  renderAccuracy(d.accuracy);
+  renderChatPrompts();
+}
+
+// ─── LOAD ───
+async function load(){
+  try{
+    const res = await fetch(`${DATA_URL}?ts=${Date.now()}`,{cache:"no-store"});
+    if(!res.ok)throw new Error(res.status);
+    state.data = await res.json();
+    render();
+  }catch(err){
+    console.error(err);
+    document.getElementById("board").innerHTML='<div class="sb-empty">Failed to load the board. Please try again.</div>';
+  }
+}
+load();
+</script>
+</body>
+</html>
