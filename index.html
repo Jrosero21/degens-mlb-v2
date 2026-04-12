@@ -1084,6 +1084,52 @@ function generateAIResponse(query){
     return buildParlayAnalysis(games, Math.min(Math.max(legs, 2), 6));
   }
 
+  // ─── BANKROLL / BET SIZE / KELLY SIZING ───
+  const bankrollMatch = q.match(/\$\s*([\d,]+)/)||q.match(/([\d,]+)\s*(?:dollar|bankroll|budget|bank)/);
+  if(bankrollMatch || q.includes("bankroll")||q.includes("bet size")||q.includes("how much")||q.includes("kelly")||q.includes("unit")||q.includes("wager")||q.includes("sizing")||q.includes("allocat")) {
+    const bankroll = bankrollMatch ? parseFloat(bankrollMatch[1].replace(/,/g,"")) : 500;
+    const withEdge = games.filter(g=>g.has_kelly_edge && g.kelly_half_pct > 0).sort((a,b)=>(b.kelly_half_pct||0)-(a.kelly_half_pct||0));
+
+    if(!withEdge.length) return `With a $${bankroll.toLocaleString()} bankroll, I don't see any games today where the model has a positive edge over the odds. That means Kelly says sit this slate out -- no bets.`;
+
+    let resp = `<strong>Kelly Bet Sizing -- $${bankroll.toLocaleString()} Bankroll:</strong><br><br>`;
+    let totalAllocated = 0;
+    let totalBets = 0;
+
+    // Cap individual bets at 15% of bankroll and apply a minimum of $5
+    withEdge.forEach(g => {
+      const rawPct = g.kelly_half_pct / 100;
+      const cappedPct = Math.min(rawPct, 0.15);
+      const betAmount = Math.max(Math.round(bankroll * cappedPct), 5);
+      if(betAmount < 5) return;
+
+      const pickedOdds = g.projected_winner_side==="home"?g.vegas_moneyline_home:g.vegas_moneyline_away;
+      const potentialWin = pickedOdds > 0 ? Math.round(betAmount * pickedOdds / 100) : Math.round(betAmount * 100 / Math.abs(pickedOdds));
+
+      totalAllocated += betAmount;
+      totalBets++;
+
+      const strength = g.kelly_half_pct >= 15 ? "Strong" : g.kelly_half_pct >= 5 ? "Moderate" : "Small";
+      resp += `<strong>${t(g.projected_winner)}</strong> ML (${fMl(pickedOdds)}) -- ${t(g.away_team)} @ ${t(g.home_team)}<br>`;
+      resp += `Bet: <strong>$${betAmount}</strong> (${(cappedPct*100).toFixed(1)}%) | Edge: +${(g.kelly_edge*100).toFixed(1)}% | To win: $${potentialWin} | ${strength}<br>`;
+      resp += `Confidence: ${fP(g.projected_confidence_pct)} | Track: ${fP(g.historical_bucket_accuracy_pct)}<br><br>`;
+    });
+
+    const pctUsed = ((totalAllocated / bankroll) * 100).toFixed(1);
+    resp += `<strong>Total:</strong> $${totalAllocated} across ${totalBets} bet${totalBets!==1?"s":""} (${pctUsed}% of bankroll)<br>`;
+    resp += `<strong>Reserve:</strong> $${bankroll - totalAllocated} stays in the bankroll<br><br>`;
+
+    // Risk note
+    if(parseFloat(pctUsed) > 40) {
+      resp += `<em>Heads up: you'd be deploying ${pctUsed}% of your bankroll today. That's aggressive. Consider scaling down to quarter Kelly (halve all bet sizes) if you want to play it safer.</em>`;
+    } else if(parseFloat(pctUsed) > 20) {
+      resp += `<em>Solid allocation. Half Kelly keeps the variance manageable while still capitalizing on the edge the model sees.</em>`;
+    } else {
+      resp += `<em>Conservative day -- not a lot of strong edges. The model is being selective, which is usually a good sign for long-term profitability.</em>`;
+    }
+    return resp;
+  }
+
   // ─── EDGE / VALUE QUESTIONS ───
   if(q.includes("edge")||q.includes("value")||q.includes("strongest")||q.includes("best value")||q.includes("biggest")){
     const sorted = [...games].sort((a,b)=>Math.abs(b.projected_score_diff||0)-Math.abs(a.projected_score_diff||0)).slice(0,3);
