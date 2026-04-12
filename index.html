@@ -1738,9 +1738,11 @@ function buildBoardContext(){
     const key = matchScoreKey(g);
     const score = liveScores[key];
     const status = score?.completed ? "FINISHED" : isStarted ? "LIVE" : "UPCOMING";
-    const liveScore = score ? `${score.awayScore}-${score.homeScore}` : "";
+    const liveScore = score ? `${t(g.away_team)}=${score.awayScore} ${t(g.home_team)}=${score.homeScore}` : "";
+    const winner = score ? (Number(score.awayScore)>Number(score.homeScore)?t(g.away_team):Number(score.homeScore)>Number(score.awayScore)?t(g.home_team):"TIE") : "";
+    const pickCorrect = score?.completed && winner ? (winner===t(g.projected_winner)?"CORRECT":"WRONG") : "";
     const pickedOdds = g.projected_winner_side==="home"?g.vegas_moneyline_home:g.vegas_moneyline_away;
-    ctx+=`[${status}${liveScore?" "+liveScore:""}] ${t(g.away_team)}@${t(g.home_team)} | Pick:${t(g.projected_winner)} conf=${g.projected_confidence_pct}% | `;
+    ctx+=`[${status}${liveScore?" "+liveScore:""}${winner?" winner="+winner:""}${pickCorrect?" pick="+pickCorrect:""}] ${t(g.away_team)}@${t(g.home_team)} | Pick:${t(g.projected_winner)} conf=${g.projected_confidence_pct}% | `;
     ctx+=`Score:${fN(g.projected_away_runs)}-${fN(g.projected_home_runs)} margin=${fSig(g.projected_score_diff,2)} | `;
     ctx+=`ML:${fMl(g.vegas_moneyline_away)}/${fMl(g.vegas_moneyline_home)} | `;
     ctx+=`Spread:${tText(g.projected_runline_pick)||"--"} conf=${fP(g.projected_runline_confidence_pct)} edge=${fSig(g.projected_runline_edge,2)} | `;

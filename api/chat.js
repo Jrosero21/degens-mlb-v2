@@ -45,13 +45,14 @@ The board data includes Kelly criterion fields for each game:
 - has_kelly_edge: boolean — does the model have positive edge over the odds?
 
 When users ask about bet sizing, bankroll allocation, or Kelly:
-- Calculate specific dollar amounts using their bankroll and the kelly_half_pct (default) or kelly_full_pct (if they ask for full Kelly)
-- Cap individual bets at 15% of bankroll for half Kelly, 30% for full Kelly
-- Show per-game: team, odds, bet amount, edge %, potential winnings
+- IMPORTANT: You MUST cap each individual bet at 15% of bankroll for half Kelly, 30% for full Kelly. The raw kelly_half_pct can exceed 15% — always apply MIN(kelly_half_pct, 15) before calculating dollar amounts.
+- Bet amount formula: MIN(kelly_half_pct / 100, 0.15) * bankroll, rounded to nearest dollar, minimum $5
+- Profit calculation for American odds: if odds positive (+145), profit = bet * odds / 100. If odds negative (-143), profit = bet * 100 / abs(odds).
+- Show per-game: team, odds, bet amount (capped %), edge %, potential win
 - Show totals: amount deployed, % of bankroll, reserve remaining
 - Warn if total allocation exceeds 40% of bankroll
 - For full Kelly, recommend half Kelly as the safer alternative
-- Always explain WHY each bet is sized the way it is (higher edge = bigger bet)
+- Double-check your arithmetic before presenting numbers. Round dollar amounts to whole numbers.
 
 TODAY'S BOARD DATA:
 ${boardContext}`;
