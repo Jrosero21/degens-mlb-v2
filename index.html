@@ -363,12 +363,27 @@ a{color:inherit;text-decoration:none}
 
 /* ─── STARTED GAMES ─── */
 .sb-game.is-started{opacity:0.55}
+.sb-game.is-started.has-live-score{opacity:0.75}
 .sb-game.is-started .sb-conf-fill,.sb-game.is-started .sb-kelly-bar-fill{opacity:0.4}
 .sb-started-label{
   font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;
   color:var(--sb-muted);padding:2px 8px;border-radius:99px;
   background:rgba(255,255,255,0.05);border:1px solid var(--sb-border);
 }
+.sb-started-label.is-live{color:var(--sb-green);background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.25)}
+.sb-started-label.is-live::before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--sb-green);margin-right:4px;animation:pulse 2s infinite}
+.sb-started-label.is-final{color:var(--sb-muted);background:rgba(255,255,255,0.05)}
+.sb-live-score{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 12px;margin-top:6px;border-radius:var(--sb-radius-sm);
+  background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.15);
+}
+.sb-live-score.is-final{background:rgba(255,255,255,0.03);border-color:var(--sb-border)}
+.sb-live-score-team{font-size:13px;font-weight:700;flex:1}
+.sb-live-score-num{font-size:20px;font-weight:800;min-width:28px;text-align:center}
+.sb-live-score-dash{color:var(--sb-muted);font-size:14px}
+.sb-live-score-status{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--sb-green)}
+.sb-live-score-status.is-final{color:var(--sb-muted)}
 .sb-started-divider{
   grid-column:1/-1;display:flex;align-items:center;gap:12px;
   padding:8px 0;color:var(--sb-muted);font-size:12px;font-weight:600;
@@ -1771,6 +1786,104 @@ function render(){
   renderChatPrompts();
 }
 
+// ─── LIVE SCORES ───
+const ODDS_TEAM_MAP = {
+  "Arizona Diamondbacks":"AZ","Atlanta Braves":"ATL","Baltimore Orioles":"BAL",
+  "Boston Red Sox":"BOS","Chicago Cubs":"CHN","Chicago White Sox":"CHA",
+  "Cincinnati Reds":"CIN","Cleveland Guardians":"CLE","Colorado Rockies":"COL",
+  "Detroit Tigers":"DET","Houston Astros":"HOU","Kansas City Royals":"KCA",
+  "Los Angeles Angels":"ANA","Los Angeles Dodgers":"LAN","Miami Marlins":"MIA",
+  "Milwaukee Brewers":"MIL","Minnesota Twins":"MIN","New York Mets":"NYN",
+  "New York Yankees":"NYA","Oakland Athletics":"ATH","Philadelphia Phillies":"PHI",
+  "Pittsburgh Pirates":"PIT","San Diego Padres":"SDN","San Francisco Giants":"SFN",
+  "Seattle Mariners":"SEA","St. Louis Cardinals":"SLN","Tampa Bay Rays":"TBA",
+  "Texas Rangers":"TEX","Toronto Blue Jays":"TOR","Washington Nationals":"WAS"
+};
+
+let liveScores = {}; // keyed by "away_code|home_code"
+
+function matchScoreKey(g){
+  return `${g.away_team}|${g.home_team}`;
+}
+
+async function fetchLiveScores(){
+  try{
+    const res = await fetch("/api/scores");
+    if(!res.ok) return;
+    const data = await res.json();
+    const newScores = {};
+    data.forEach(event=>{
+      if(!event.scores) return;
+      const away = ODDS_TEAM_MAP[event.away_team];
+      const home = ODDS_TEAM_MAP[event.home_team];
+      if(!away||!home) return;
+      const awayScore = event.scores.find(s=>s.name===event.away_team);
+      const homeScore = event.scores.find(s=>s.name===event.home_team);
+      newScores[`${away}|${home}`] = {
+        awayScore: awayScore?.score ?? "--",
+        homeScore: homeScore?.score ?? "--",
+        completed: event.completed||false,
+        lastUpdate: event.last_update
+      };
+    });
+    liveScores = newScores;
+    updateLiveScoreCards();
+    console.log(`Live scores updated: ${Object.keys(newScores).length} games`);
+  }catch(e){
+    console.log("Live scores fetch failed:", e.message);
+  }
+}
+
+function updateLiveScoreCards(){
+  document.querySelectorAll(".sb-game.is-started").forEach(card=>{
+    const pk = Number(card.dataset.pk);
+    const game = state.data?.games?.find(g=>g.gamePk===pk);
+    if(!game) return;
+    const key = matchScoreKey(game);
+    const score = liveScores[key];
+    // Remove old live score if any
+    const old = card.querySelector(".sb-live-score");
+    if(old) old.remove();
+    if(!score) return;
+
+    card.classList.add("has-live-score");
+    // Update the "Started" label
+    const label = card.querySelector(".sb-started-label");
+    if(label){
+      if(score.completed){
+        label.className="sb-started-label is-final";
+        label.textContent="Final";
+      } else {
+        label.className="sb-started-label is-live";
+        label.textContent="Live";
+      }
+    }
+    // Insert live score display after the game-teams row
+    const teamsRow = card.querySelector(".sb-game-teams");
+    if(!teamsRow) return;
+    const scoreEl = document.createElement("div");
+    scoreEl.className = `sb-live-score${score.completed?" is-final":""}`;
+    scoreEl.innerHTML = `
+      <span class="sb-live-score-team">${t(game.away_team)}</span>
+      <span class="sb-live-score-num">${score.awayScore}</span>
+      <span class="sb-live-score-dash">-</span>
+      <span class="sb-live-score-num">${score.homeScore}</span>
+      <span class="sb-live-score-team" style="text-align:right">${t(game.home_team)}</span>
+      <span class="sb-live-score-status${score.completed?" is-final":""}">${score.completed?"Final":"Live"}</span>
+    `;
+    teamsRow.after(scoreEl);
+  });
+}
+
+// Poll every 90 seconds -- baseball scores change slowly, saves API calls
+// Vercel caches the API response for 60s via s-maxage, so even rapid polling
+// only costs 1 API call per minute at most
+let liveInterval = null;
+function startLivePolling(){
+  fetchLiveScores(); // initial fetch
+  liveInterval = setInterval(fetchLiveScores, 90000); // every 90 seconds
+}
+
 // ─── LOAD ───
 async function load(){
   try{
@@ -1778,6 +1891,10 @@ async function load(){
     if(!res.ok)throw new Error(res.status);
     state.data = await res.json();
     render();
+    // Start live score polling if there are games that have started
+    const now = new Date();
+    const hasStarted = state.data.games?.some(g=>g.commence_time_utc && new Date(g.commence_time_utc)<=now);
+    if(hasStarted) startLivePolling();
   }catch(err){
     console.error(err);
     document.getElementById("board").innerHTML='<div class="sb-empty">Failed to load the board. Please try again.</div>';
