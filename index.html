@@ -1881,7 +1881,7 @@ function updateLiveScoreCards(){
 let liveInterval = null;
 function startLivePolling(){
   fetchLiveScores(); // initial fetch
-  liveInterval = setInterval(fetchLiveScores, 90000); // every 90 seconds
+  liveInterval = setInterval(fetchLiveScores, 120000); // every 2 minutes
 }
 
 // ─── LOAD ───
