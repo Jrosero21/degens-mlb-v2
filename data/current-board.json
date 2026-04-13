@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-04-13T06:47:48.959628+00:00",
+    "generatedAt": "2026-04-13T06:59:24.643091+00:00",
     "dbName": "jonnyrosero_score",
     "refreshStartDate": "2026-04-12",
     "refreshDays": 2,
@@ -249,7 +249,7 @@
       "away_cover_prob": 0.427659,
       "home_cover_prob": 0.572341,
       "vegas_moneyline_away": -111.0,
-      "vegas_moneyline_home": 101.0,
+      "vegas_moneyline_home": 104.0,
       "market_favorite": "CLE",
       "market_favorite_side": "away",
       "model_vs_market": "AGREE",
@@ -485,7 +485,7 @@
       "vegas_total_line": 7.5,
       "vegas_spread_away": 1.5,
       "vegas_spread_home": -1.5,
-      "away_spread_price_american": -117.0,
+      "away_spread_price_american": -120.0,
       "home_spread_price_american": 106.0,
       "projected_ou_pick": "UNDER",
       "projected_total_edge": -1.317,
