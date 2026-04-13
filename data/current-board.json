@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-04-13T05:50:39.517446+00:00",
+    "generatedAt": "2026-04-13T06:02:01.180574+00:00",
     "dbName": "jonnyrosero_score",
     "refreshStartDate": "2026-04-12",
     "refreshDays": 2,
@@ -548,7 +548,7 @@
       "vegas_spread_away": -1.5,
       "vegas_spread_home": 1.5,
       "away_spread_price_american": 130.0,
-      "home_spread_price_american": -138.0,
+      "home_spread_price_american": -140.0,
       "projected_ou_pick": "UNDER",
       "projected_total_edge": -3.154,
       "projected_ou_prob": 0.894497,
@@ -558,8 +558,8 @@
       "projected_runline_confidence_pct": 77.0,
       "away_cover_prob": 0.229855,
       "home_cover_prob": 0.770145,
-      "vegas_moneyline_away": -128.0,
-      "vegas_moneyline_home": 120.0,
+      "vegas_moneyline_away": -126.0,
+      "vegas_moneyline_home": 118.0,
       "market_favorite": "TEX",
       "market_favorite_side": "away",
       "model_vs_market": "DISAGREE",
@@ -583,9 +583,9 @@
       "moneyline_roi_play": false,
       "runline_roi_play": true,
       "total_roi_play": true,
-      "kelly_full_pct": 15.54,
-      "kelly_half_pct": 7.77,
-      "kelly_edge": 0.0848,
+      "kelly_full_pct": 14.89,
+      "kelly_half_pct": 7.44,
+      "kelly_edge": 0.0806,
       "has_kelly_edge": true
     },
     {
@@ -609,7 +609,7 @@
       "vegas_total_line": 7.5,
       "vegas_spread_away": 1.5,
       "vegas_spread_home": -1.5,
-      "away_spread_price_american": -142.0,
+      "away_spread_price_american": -140.0,
       "home_spread_price_american": 133.0,
       "projected_ou_pick": "UNDER",
       "projected_total_edge": -0.894,
@@ -621,7 +621,7 @@
       "away_cover_prob": 0.714119,
       "home_cover_prob": 0.285881,
       "vegas_moneyline_away": 150.0,
-      "vegas_moneyline_home": -163.0,
+      "vegas_moneyline_home": -165.0,
       "market_favorite": "SEA",
       "market_favorite_side": "home",
       "model_vs_market": "AGREE",
@@ -647,7 +647,7 @@
       "total_roi_play": true,
       "kelly_full_pct": 0,
       "kelly_half_pct": 0,
-      "kelly_edge": -0.107,
+      "kelly_edge": -0.1099,
       "has_kelly_edge": false
     },
     {
