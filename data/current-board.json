@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-04-13T19:35:08.196691+00:00",
+    "generatedAt": "2026-04-13T19:46:40.015177+00:00",
     "dbName": "jonnyrosero_score",
     "refreshStartDate": "2026-04-13",
     "refreshDays": 2,
@@ -92,7 +92,7 @@
   },
   "featured": [
     {
-      "id": 1308,
+      "id": 1314,
       "run_date": "2026-04-13",
       "game_date": "2026-04-13",
       "board_display_date": "2026-04-13",
@@ -130,11 +130,11 @@
       "model_version": "blend_runs_v1_50_50_nb_gbr_retrained_with_2026_completed",
       "projection_stage": "shadow_retrained",
       "source_view": "v_score_predictions_board_active_v1",
-      "created_at": "2026-04-13T15:34:44",
-      "updated_at": "2026-04-13T15:34:44"
+      "created_at": "2026-04-13T15:46:14",
+      "updated_at": "2026-04-13T15:46:14"
     },
     {
-      "id": 1310,
+      "id": 1316,
       "run_date": "2026-04-13",
       "game_date": "2026-04-13",
       "board_display_date": "2026-04-13",
@@ -172,11 +172,11 @@
       "model_version": "blend_runs_v1_50_50_nb_gbr_retrained_with_2026_completed",
       "projection_stage": "shadow_retrained",
       "source_view": "v_score_predictions_board_active_v1",
-      "created_at": "2026-04-13T15:34:44",
-      "updated_at": "2026-04-13T15:34:44"
+      "created_at": "2026-04-13T15:46:14",
+      "updated_at": "2026-04-13T15:46:14"
     },
     {
-      "id": 1309,
+      "id": 1315,
       "run_date": "2026-04-13",
       "game_date": "2026-04-13",
       "board_display_date": "2026-04-13",
@@ -214,8 +214,8 @@
       "model_version": "blend_runs_v1_50_50_nb_gbr_retrained_with_2026_completed",
       "projection_stage": "shadow_retrained",
       "source_view": "v_score_predictions_board_active_v1",
-      "created_at": "2026-04-13T15:34:44",
-      "updated_at": "2026-04-13T15:34:44"
+      "created_at": "2026-04-13T15:46:14",
+      "updated_at": "2026-04-13T15:46:14"
     }
   ],
   "games": [
@@ -364,7 +364,7 @@
       "vegas_total_line": 8.0,
       "vegas_spread_away": -1.5,
       "vegas_spread_home": 1.5,
-      "away_spread_price_american": 145.0,
+      "away_spread_price_american": 146.0,
       "home_spread_price_american": -160.0,
       "projected_ou_pick": "UNDER",
       "projected_total_edge": -1.636,
@@ -500,7 +500,7 @@
       "away_cover_prob": 0.643657,
       "home_cover_prob": 0.356343,
       "vegas_moneyline_away": 170.0,
-      "vegas_moneyline_home": -181.0,
+      "vegas_moneyline_home": -180.0,
       "market_favorite": "NYA",
       "market_favorite_side": "home",
       "model_vs_market": "AGREE",
@@ -526,7 +526,7 @@
       "total_roi_play": true,
       "kelly_full_pct": 0,
       "kelly_half_pct": 0,
-      "kelly_edge": -0.037,
+      "kelly_edge": -0.0357,
       "has_kelly_edge": false
     },
     {
@@ -686,7 +686,7 @@
       "away_cover_prob": 0.229855,
       "home_cover_prob": 0.770145,
       "vegas_moneyline_away": -121.0,
-      "vegas_moneyline_home": 112.0,
+      "vegas_moneyline_home": 110.0,
       "market_favorite": "TEX",
       "market_favorite_side": "away",
       "model_vs_market": "DISAGREE",
@@ -710,9 +710,9 @@
       "moneyline_roi_play": false,
       "runline_roi_play": true,
       "total_roi_play": true,
-      "kelly_full_pct": 12.8,
-      "kelly_half_pct": 6.4,
-      "kelly_edge": 0.0676,
+      "kelly_full_pct": 12.05,
+      "kelly_half_pct": 6.03,
+      "kelly_edge": 0.0631,
       "has_kelly_edge": true
     },
     {
@@ -733,15 +733,15 @@
       "projected_home_runs": 3.345,
       "projected_score_diff": 0.084,
       "projected_total_runs": 6.606,
-      "vegas_total_line": 8.0,
+      "vegas_total_line": 7.5,
       "vegas_spread_away": 1.5,
       "vegas_spread_home": -1.5,
-      "away_spread_price_american": -138.0,
-      "home_spread_price_american": 125.0,
+      "away_spread_price_american": -137.0,
+      "home_spread_price_american": 128.0,
       "projected_ou_pick": "UNDER",
-      "projected_total_edge": -1.394,
-      "projected_ou_prob": 0.718013,
-      "projected_ou_confidence_pct": 71.8,
+      "projected_total_edge": -0.894,
+      "projected_ou_prob": 0.657198,
+      "projected_ou_confidence_pct": 65.7,
       "projected_runline_pick": "HOU +1.5",
       "projected_runline_prob": 0.714119,
       "projected_runline_confidence_pct": 71.4,
