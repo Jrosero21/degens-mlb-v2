@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-04-14T06:17:02.642239+00:00",
+    "generatedAt": "2026-04-14T06:28:25.698816+00:00",
     "dbName": "jonnyrosero_score",
     "refreshStartDate": "2026-04-13",
     "refreshDays": 2,
@@ -547,7 +547,7 @@
       "vegas_total_line": 7.0,
       "vegas_spread_away": -1.5,
       "vegas_spread_home": -1.5,
-      "away_spread_price_american": 172.0,
+      "away_spread_price_american": 176.0,
       "home_spread_price_american": 175.0,
       "projected_ou_pick": "UNDER",
       "projected_total_edge": -1.354,
