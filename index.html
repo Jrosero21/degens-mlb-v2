@@ -659,12 +659,17 @@ function buildCard(g){
   const ouText = g.projected_ou_pick ? `${g.projected_ou_pick} ${fN(g.vegas_total_line)}${g.projected_ou_confidence_pct!=null?` (${fP(g.projected_ou_confidence_pct)})`:""}` : (g.vegas_total_line!=null?`Line: ${fN(g.vegas_total_line)}`:"--");
 
   const isStarted = g.commence_time_utc ? new Date(g.commence_time_utc) <= new Date() : false;
+  const isFinal = g.actual_away_runs != null && g.actual_home_runs != null;
+  if(isFinal) tags = `<span class="sb-game-tag" style="background:rgba(111,181,255,0.15);color:#6fb5ff;border-color:rgba(111,181,255,0.3)">Final</span>` + tags;
+
+  const pickResultColor = g.pick_correct===true?"var(--sb-green)":g.pick_correct===false?"var(--sb-red)":"var(--sb-muted)";
+  const pickResultText = g.pick_correct===true?"✓ Correct":g.pick_correct===false?"✗ Wrong":"—";
 
   return `
-  <article class="sb-game${isOpen?" is-open":""}${isBest?" is-best-bet":""}${isDisagree?" is-disagree":""}${isStarted?" is-started":""}" data-pk="${g.gamePk}">
+  <article class="sb-game${isOpen?" is-open":""}${isBest?" is-best-bet":""}${isDisagree?" is-disagree":""}${isStarted&&!isFinal?" is-started":""}" data-pk="${g.gamePk}">
     <button class="sb-game-head" data-pk="${g.gamePk}">
       <div class="sb-game-top">
-        <span class="sb-game-time">${fTime(g.commence_time_utc)}${isStarted?' <span class="sb-started-label">Started</span>':''}</span>
+        <span class="sb-game-time">${fTime(g.commence_time_utc)}${isStarted&&!isFinal?' <span class="sb-started-label">Started</span>':''}</span>
         <div class="sb-game-tags">${tags}</div>
       </div>
       <div class="sb-game-teams">
@@ -674,22 +679,34 @@ function buildCard(g){
           <span>${t(g.home_team)}</span>
         </div>
         <div style="text-align:right;margin-right:8px">
+          ${isFinal?`
+          <span style="font-size:11px;color:var(--sb-muted);display:block">Final Score</span>
+          <span style="font-size:14px;font-weight:700;color:var(--sb-text)">${t(g.away_team)} ${g.actual_away_runs} – ${t(g.home_team)} ${g.actual_home_runs}</span>
+          `:`
           <span style="font-size:11px;color:var(--sb-muted);display:block">Our Pick</span>
           <span style="font-size:14px;font-weight:700;color:var(--sb-green)">${t(g.projected_winner)} ${fMl(pickedOdds)}</span>
+          `}
         </div>
         <div class="sb-game-expand">+</div>
       </div>
       <div class="sb-conf-bar"><div class="sb-conf-fill" style="width:${conf||0}%;background:${confColor(conf)}"></div></div>
-      ${g.has_kelly_edge?`<div class="sb-kelly-bar">
+      ${g.has_kelly_edge&&!isFinal?`<div class="sb-kelly-bar">
         <span class="sb-kelly-bar-label">Bet Size</span>
         <div class="sb-kelly-bar-track"><div class="sb-kelly-bar-fill" style="width:${Math.min(g.kelly_half_pct||0,30)/30*100}%"></div></div>
         <span class="sb-kelly-bar-value">${fKelly(g.kelly_half_pct)}</span>
       </div>`:""}
       <div class="sb-game-glance">
+        ${isFinal?`
+        <div class="sb-glance"><span class="sb-glance-label">Pick Result</span><span class="sb-glance-value" style="color:${pickResultColor}">${pickResultText}</span></div>
+        <div class="sb-glance"><span class="sb-glance-label">We Picked</span><span class="sb-glance-value">${t(g.projected_winner)} (${fP(conf)})</span></div>
+        <div class="sb-glance"><span class="sb-glance-label">Projected Score</span><span class="sb-glance-value">${fN(g.projected_away_runs)}-${fN(g.projected_home_runs)}</span></div>
+        <div class="sb-glance"><span class="sb-glance-label">Spread Pick</span><span class="sb-glance-value">${runlineText}</span></div>
+        `:`
         <div class="sb-glance"><span class="sb-glance-label">How Sure</span><span class="sb-glance-value" style="color:${confColor(conf)}">${fP(conf)}</span></div>
         <div class="sb-glance"><span class="sb-glance-label">Projected Score</span><span class="sb-glance-value">${fN(g.projected_away_runs)}-${fN(g.projected_home_runs)}</span></div>
         <div class="sb-glance"><span class="sb-glance-label">Spread Pick</span><span class="sb-glance-value">${runlineText}</span></div>
         <div class="sb-glance"><span class="sb-glance-label">${g.has_kelly_edge?"Edge Over Odds":hasOU(g)?"Over/Under":"O/U Line"}</span><span class="sb-glance-value" style="${g.has_kelly_edge?"color:var(--sb-purple)":""}">${g.has_kelly_edge?`+${(g.kelly_edge*100).toFixed(1)}%`:ouText}</span></div>
+        `}
       </div>
     </button>
     <div class="sb-game-body" ${isOpen?"":"hidden"}>
@@ -1716,6 +1733,7 @@ function buildBoardContext(){
   const acc = d.accuracy||{};
   const games = d.games||[];
   const featured = d.featured||[];
+  const recentGames = d.recentGames||[];
 
   // Build a concise but complete board summary for Claude
   let ctx = `Board date: ${meta.boardDate}\n`;
@@ -1730,6 +1748,21 @@ function buildBoardContext(){
   featured.forEach(f=>{
     ctx+=`- ${f.card_type}: ${tText(f.card_title)} (${t(f.away_team)}@${t(f.home_team)}) conf=${f.confidence_score_pct}% | ${tText(f.body_text||"")}\n`;
   });
+
+  if(recentGames.length){
+    ctx+=`\nYESTERDAY'S RESULTS:\n`;
+    recentGames.forEach(g=>{
+      const aw = g.actual_away_runs; const hw = g.actual_home_runs;
+      const hasResult = aw!=null && hw!=null;
+      const scoreStr = hasResult ? `Final: ${t(g.away_team)} ${aw} - ${t(g.home_team)} ${hw}` : "No result yet";
+      const actualWinner = hasResult ? (Number(aw)>Number(hw)?t(g.away_team):Number(hw)>Number(aw)?t(g.home_team):"TIE") : "";
+      const pickResult = g.pick_correct===true ? "CORRECT" : g.pick_correct===false ? "WRONG" : "";
+      ctx+=`[${hasResult?"FINAL":"PENDING"}] ${t(g.away_team)}@${t(g.home_team)} | ${scoreStr}`;
+      if(actualWinner) ctx+=` | Winner: ${actualWinner}`;
+      if(pickResult) ctx+=` | Pick: ${t(g.projected_winner)} ${pickResult}`;
+      ctx+=` | Model had conf=${g.projected_confidence_pct}%\n`;
+    });
+  }
 
   ctx+=`\nALL GAMES:\n`;
   const now = new Date();
