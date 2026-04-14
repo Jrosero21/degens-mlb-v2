@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-04-14T01:07:58.853279+00:00",
+    "generatedAt": "2026-04-14T01:19:28.464943+00:00",
     "dbName": "jonnyrosero_score",
     "refreshStartDate": "2026-04-13",
     "refreshDays": 2,
@@ -92,7 +92,7 @@
   },
   "featured": [
     {
-      "id": 1476,
+      "id": 1481,
       "run_date": "2026-04-13",
       "game_date": "2026-04-13",
       "board_display_date": "2026-04-13",
@@ -130,8 +130,8 @@
       "model_version": "blend_runs_v1_50_50_nb_gbr_retrained_with_2026_completed",
       "projection_stage": "shadow_retrained",
       "source_view": "v_score_predictions_board_active_v1",
-      "created_at": "2026-04-13T21:07:33",
-      "updated_at": "2026-04-13T21:07:33"
+      "created_at": "2026-04-13T21:18:58",
+      "updated_at": "2026-04-13T21:18:58"
     }
   ],
   "games": [
@@ -156,8 +156,8 @@
       "vegas_total_line": 8.5,
       "vegas_spread_away": 1.5,
       "vegas_spread_home": -1.5,
-      "away_spread_price_american": -135.0,
-      "home_spread_price_american": 125.0,
+      "away_spread_price_american": -140.0,
+      "home_spread_price_american": 133.0,
       "projected_ou_pick": "OVER",
       "projected_total_edge": 0.195,
       "projected_ou_prob": 0.503537,
@@ -168,7 +168,7 @@
       "away_cover_prob": 0.451914,
       "home_cover_prob": 0.548086,
       "vegas_moneyline_away": 143.0,
-      "vegas_moneyline_home": -154.0,
+      "vegas_moneyline_home": -151.0,
       "market_favorite": "LAN",
       "market_favorite_side": "home",
       "model_vs_market": "AGREE",
@@ -192,9 +192,9 @@
       "moneyline_roi_play": true,
       "runline_roi_play": false,
       "total_roi_play": false,
-      "kelly_full_pct": 33.2,
-      "kelly_half_pct": 16.6,
-      "kelly_edge": 0.1307,
+      "kelly_full_pct": 33.99,
+      "kelly_half_pct": 16.99,
+      "kelly_edge": 0.1354,
       "has_kelly_edge": true
     },
     {
@@ -962,7 +962,7 @@
       "vegas_total_line": 8.5,
       "vegas_spread_away": 1.5,
       "vegas_spread_home": -1.5,
-      "away_spread_price_american": -136.0,
+      "away_spread_price_american": -140.0,
       "home_spread_price_american": 126.0,
       "projected_ou_pick": "UNDER",
       "projected_total_edge": -2.646,
@@ -1149,7 +1149,7 @@
       "vegas_spread_away": -1.5,
       "vegas_spread_home": 1.5,
       "away_spread_price_american": 128.0,
-      "home_spread_price_american": -135.0,
+      "home_spread_price_american": -140.0,
       "projected_ou_pick": "UNDER",
       "projected_total_edge": -1.711,
       "projected_ou_prob": 0.759667,
