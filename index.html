@@ -915,10 +915,14 @@ function renderBoard(games,recentGames){
   if(!filtered.length){
     board.innerHTML='<div class="sb-empty">No games match this filter.</div>';
   } else {
-    let html = upcoming.map(g=>buildCard(g)).join("");
+    let html = "";
     if(liveDisplay.length){
       html+=`<div class="sb-started-divider">Live (${liveDisplay.length})</div>`;
       html+=liveDisplay.map(g=>buildCard(g)).join("");
+    }
+    if(upcoming.length){
+      if(liveDisplay.length||finishedDisplay.length) html+=`<div class="sb-started-divider">Upcoming (${upcoming.length})</div>`;
+      html+=upcoming.map(g=>buildCard(g)).join("");
     }
     if(finishedDisplay.length){
       html+=`<div class="sb-started-divider">Finished (${finishedDisplay.length})</div>`;
