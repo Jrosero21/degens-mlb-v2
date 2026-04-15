@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-04-15T01:05:53.844060+00:00",
+    "generatedAt": "2026-04-15T01:11:15.311125+00:00",
     "dbName": "jonnyrosero_score",
     "refreshStartDate": "2026-04-14",
     "refreshDays": 2,
@@ -2671,7 +2671,7 @@
       "projection_stage": "shadow_retrained_2026",
       "actual_away_runs": 1,
       "actual_home_runs": 2,
-      "game_result_status": "Game Over",
+      "game_result_status": "Final",
       "pick_correct": true,
       "market_runline": "KCA -1.5 / DET +1.5",
       "projected_runline_edge": null,
@@ -2737,7 +2737,7 @@
       "projection_stage": "shadow_retrained_2026",
       "actual_away_runs": 1,
       "actual_home_runs": 2,
-      "game_result_status": "Game Over",
+      "game_result_status": "Final",
       "pick_correct": false,
       "market_runline": "SFN -1.5 / CIN +1.5",
       "projected_runline_edge": null,
