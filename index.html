@@ -402,55 +402,102 @@ a{color:inherit;text-decoration:none}
 
 /* ─── BANKROLL CALCULATOR ─── */
 .sb-bankroll{
-  margin:0 16px 8px;padding:16px;
+  margin:0 16px 8px;
   border-radius:var(--sb-radius-lg);
-  background:linear-gradient(135deg,rgba(168,85,247,0.1) 0%,rgba(59,130,246,0.06) 100%),var(--sb-surface);
-  border:1px solid rgba(168,85,247,0.25);
+  background:var(--sb-surface);
+  border:1px solid rgba(168,85,247,0.22);
+  overflow:hidden;
 }
-.sb-bankroll-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-.sb-bankroll-title{font-size:14px;font-weight:700;color:var(--sb-text)}
-.sb-bankroll-title span{color:var(--sb-purple)}
-.sb-bankroll-input-row{display:flex;align-items:center;gap:8px}
-.sb-bankroll-prefix{font-size:16px;font-weight:700;color:var(--sb-purple)}
-.sb-bankroll-input{
-  width:120px;padding:7px 10px;
-  background:var(--sb-surface-2);border:1px solid rgba(168,85,247,0.3);
-  border-radius:var(--sb-radius-sm);color:var(--sb-text);
-  font-family:inherit;font-size:15px;font-weight:700;
-  outline:none;
-}
-.sb-bankroll-input:focus{border-color:var(--sb-purple);box-shadow:0 0 0 2px rgba(168,85,247,0.15)}
-.sb-bankroll-toggle{
-  font-size:11px;font-weight:600;padding:5px 10px;border-radius:99px;
-  background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);
-  color:var(--sb-purple);cursor:pointer;white-space:nowrap;
-}
-.sb-bankroll-toggle:hover{background:rgba(168,85,247,0.15)}
-.sb-bankroll-bets{display:flex;flex-direction:column;gap:6px}
-.sb-bankroll-bet{
+.sb-bankroll-top{
   display:flex;align-items:center;gap:10px;
+  padding:13px 16px;cursor:pointer;
+  background:linear-gradient(135deg,rgba(168,85,247,0.08) 0%,rgba(59,130,246,0.04) 100%);
+  user-select:none;
+}
+.sb-bankroll-top:hover{background:linear-gradient(135deg,rgba(168,85,247,0.13) 0%,rgba(59,130,246,0.07) 100%)}
+.sb-bankroll-icon{font-size:16px;flex-shrink:0}
+.sb-bankroll-top-label{flex:1;min-width:0}
+.sb-bankroll-top-title{font-size:13px;font-weight:700;color:var(--sb-text)}
+.sb-bankroll-top-sub{font-size:11px;color:var(--sb-muted);margin-top:1px}
+.sb-bankroll-top-sub.has-data{color:var(--sb-purple)}
+.sb-bankroll-chevron{
+  font-size:12px;color:var(--sb-muted);transition:transform 0.2s ease;flex-shrink:0;
+}
+.sb-bankroll.is-open .sb-bankroll-chevron{transform:rotate(180deg)}
+.sb-bankroll-body{display:none;padding:0 14px 14px;border-top:1px solid var(--sb-border)}
+.sb-bankroll.is-open .sb-bankroll-body{display:block}
+
+/* input row */
+.sb-bankroll-controls{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  padding:12px 0 10px;
+}
+.sb-bankroll-input-wrap{
+  display:flex;align-items:center;gap:0;
+  background:var(--sb-surface-2);border:1px solid rgba(168,85,247,0.3);
+  border-radius:var(--sb-radius-sm);overflow:hidden;
+}
+.sb-bankroll-prefix{
+  padding:0 8px;font-size:15px;font-weight:700;color:var(--sb-purple);
+  background:rgba(168,85,247,0.08);border-right:1px solid rgba(168,85,247,0.2);
+  height:36px;display:flex;align-items:center;
+}
+.sb-bankroll-input{
+  width:100px;padding:0 10px;height:36px;
+  background:transparent;border:none;color:var(--sb-text);
+  font-family:inherit;font-size:14px;font-weight:700;outline:none;
+}
+.sb-bankroll-mode-chip{
+  height:36px;padding:0 12px;border-radius:var(--sb-radius-sm);
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;
+  background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.22);
+  color:var(--sb-purple);cursor:pointer;white-space:nowrap;
+  display:flex;align-items:center;
+}
+.sb-bankroll-mode-chip:hover{background:rgba(168,85,247,0.16)}
+.sb-bankroll-threshold{font-size:11px;color:var(--sb-muted);margin-left:auto}
+
+/* bet rows */
+.sb-bankroll-bets{display:flex;flex-direction:column;gap:5px;margin-top:2px}
+.sb-bankroll-bet{
+  display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:10px;
   padding:10px 12px;border-radius:var(--sb-radius-sm);
   background:var(--sb-surface-2);border:1px solid var(--sb-border);
+  transition:border-color 0.15s;
 }
-.sb-bankroll-bet-rank{font-size:10px;font-weight:700;color:var(--sb-muted);min-width:16px;text-align:center}
-.sb-bankroll-bet-info{flex:1;min-width:0}
-.sb-bankroll-bet-team{font-size:13px;font-weight:700;color:var(--sb-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sb-bankroll-bet-meta{font-size:11px;color:var(--sb-muted);margin-top:1px}
-.sb-bankroll-bet-odds{font-size:12px;font-weight:600;color:var(--sb-muted);white-space:nowrap}
-.sb-bankroll-bet-amount{text-align:right;white-space:nowrap}
-.sb-bankroll-bet-pct{font-size:11px;color:var(--sb-purple);font-weight:600}
-.sb-bankroll-bet-dollars{font-size:15px;font-weight:800;color:var(--sb-purple)}
-.sb-bankroll-bet-dollars.is-zero{color:var(--sb-muted);font-size:13px;font-weight:600}
+.sb-bankroll-bet:hover{border-color:rgba(168,85,247,0.3)}
+.sb-bankroll-bet-num{
+  width:22px;height:22px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:800;
+  background:rgba(168,85,247,0.12);color:var(--sb-purple);flex-shrink:0;
+}
+.sb-bankroll-bet.is-strong .sb-bankroll-bet-num{background:rgba(34,197,94,0.15);color:var(--sb-green)}
+.sb-bankroll-bet.is-moderate .sb-bankroll-bet-num{background:rgba(168,85,247,0.15);color:var(--sb-purple)}
+.sb-bankroll-bet.is-small .sb-bankroll-bet-num{background:rgba(245,158,11,0.12);color:var(--sb-gold)}
+.sb-bankroll-bet-info{min-width:0}
+.sb-bankroll-bet-team{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-bankroll-bet-meta{font-size:11px;color:var(--sb-muted);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sb-bankroll-bet-edge{font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px}
+.sb-bankroll-bet.is-strong .sb-bankroll-bet-edge{background:rgba(34,197,94,0.12);color:var(--sb-green)}
+.sb-bankroll-bet.is-moderate .sb-bankroll-bet-edge{background:rgba(168,85,247,0.12);color:var(--sb-purple)}
+.sb-bankroll-bet.is-small .sb-bankroll-bet-edge{background:rgba(245,158,11,0.1);color:var(--sb-gold)}
+.sb-bankroll-bet-right{text-align:right;white-space:nowrap}
+.sb-bankroll-bet-dollars{font-size:16px;font-weight:800;color:var(--sb-text);line-height:1}
+.sb-bankroll-bet-dollars.no-br{font-size:13px;font-weight:700;color:var(--sb-purple)}
+.sb-bankroll-bet-pct{font-size:11px;color:var(--sb-muted);margin-top:2px}
+
+/* total bar */
 .sb-bankroll-total{
-  display:flex;align-items:center;justify-content:space-between;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
   padding:10px 12px;border-radius:var(--sb-radius-sm);
-  background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);
-  margin-top:4px;
+  background:linear-gradient(135deg,rgba(168,85,247,0.1),rgba(59,130,246,0.06));
+  border:1px solid rgba(168,85,247,0.2);margin-top:6px;
 }
-.sb-bankroll-total-label{font-size:12px;font-weight:600;color:var(--sb-purple)}
-.sb-bankroll-total-value{font-size:14px;font-weight:800;color:var(--sb-purple)}
-.sb-bankroll-empty{font-size:12px;color:var(--sb-muted);padding:8px 0;font-style:italic}
-.sb-bankroll-mode-chip{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:2px 7px;border-radius:99px;background:rgba(168,85,247,0.12);color:var(--sb-purple);cursor:pointer;border:1px solid rgba(168,85,247,0.2)}
+.sb-bankroll-total-left{font-size:12px;color:var(--sb-muted)}
+.sb-bankroll-total-left strong{color:var(--sb-text)}
+.sb-bankroll-total-right{font-size:15px;font-weight:800;color:var(--sb-purple);white-space:nowrap}
+.sb-bankroll-empty{font-size:12px;color:var(--sb-muted);padding:12px 0;font-style:italic;text-align:center}
 @media(min-width:768px){.sb-bankroll{margin:0 0 8px}}
 
 /* ─── SECTION HEADINGS ─── */
@@ -521,17 +568,25 @@ a{color:inherit;text-decoration:none}
 
   <!-- BANKROLL CALCULATOR -->
   <div class="sb-bankroll" id="bankroll-section" hidden>
-    <div class="sb-bankroll-header">
-      <div>
-        <div class="sb-bankroll-title"><span>Bankroll</span> Calculator</div>
+    <div class="sb-bankroll-top" id="bankroll-toggle">
+      <span class="sb-bankroll-icon">💰</span>
+      <div class="sb-bankroll-top-label">
+        <div class="sb-bankroll-top-title">Bankroll Calculator</div>
+        <div class="sb-bankroll-top-sub" id="bankroll-summary">Enter your bankroll to size Kelly bets</div>
       </div>
-      <div class="sb-bankroll-input-row">
-        <span class="sb-bankroll-prefix">$</span>
-        <input class="sb-bankroll-input" id="bankroll-input" type="number" min="0" step="1" placeholder="0" inputmode="numeric"/>
-        <span class="sb-bankroll-mode-chip" id="bankroll-mode-chip" title="Click to toggle Full / Half Kelly">½ Kelly</span>
-      </div>
+      <span class="sb-bankroll-chevron">▼</span>
     </div>
-    <div id="bankroll-bets"></div>
+    <div class="sb-bankroll-body">
+      <div class="sb-bankroll-controls">
+        <div class="sb-bankroll-input-wrap">
+          <span class="sb-bankroll-prefix">$</span>
+          <input class="sb-bankroll-input" id="bankroll-input" type="number" min="0" step="1" placeholder="0" inputmode="numeric"/>
+        </div>
+        <button class="sb-bankroll-mode-chip" id="bankroll-mode-chip">½ Kelly</button>
+        <span class="sb-bankroll-threshold" id="bankroll-threshold">≥2% half-Kelly shown</span>
+      </div>
+      <div id="bankroll-bets"></div>
+    </div>
   </div>
 
   <!-- TABS -->
@@ -623,14 +678,24 @@ const fKelly = v => v==null?"--":`${Number(v).toFixed(1)}%`;
 let state = {data:null,day:"today",filter:"all",expanded:null,chatOpen:false};
 
 // ─── BANKROLL CALCULATOR ───
+const KELLY_MIN_HALF_PCT = 2; // ignore bets below 2% half-Kelly (noise)
+
 let bankrollState = {
   bankroll: Number(localStorage.getItem("br_bankroll")||0),
-  mode: localStorage.getItem("br_mode")||"half"  // "half" or "full"
+  mode: localStorage.getItem("br_mode")||"half",
+  open: localStorage.getItem("br_open")==="1"
 };
 
 function saveBankroll(){
   localStorage.setItem("br_bankroll", bankrollState.bankroll);
   localStorage.setItem("br_mode", bankrollState.mode);
+  localStorage.setItem("br_open", bankrollState.open?"1":"0");
+}
+
+function betStrength(edge){
+  if(edge>=0.12) return "strong";
+  if(edge>=0.05) return "moderate";
+  return "small";
 }
 
 function renderBankroll(){
@@ -638,29 +703,52 @@ function renderBankroll(){
   const games = state.data?.games||[];
   const boardDate = state.data?.meta?.boardDate;
   const todayGames = boardDate ? games.filter(g=>(g.board_display_date||g.game_date)===boardDate) : games;
-  const kellyGames = todayGames.filter(g=>g.has_kelly_edge && (g.kelly_half_pct||0)>0 && !g.actual_away_runs)
+  const kellyGames = todayGames
+    .filter(g=>g.has_kelly_edge && (g.kelly_half_pct||0)>=KELLY_MIN_HALF_PCT && !g.actual_away_runs)
     .sort((a,b)=>(b.kelly_edge||0)-(a.kelly_edge||0));
 
   section.hidden = false;
 
-  const modeChip = document.getElementById("bankroll-mode-chip");
-  modeChip.textContent = bankrollState.mode==="half" ? "½ Kelly" : "Full Kelly";
+  // open/close state
+  if(bankrollState.open) section.classList.add("is-open");
+  else section.classList.remove("is-open");
 
+  // update mode chip
+  const modeChip = document.getElementById("bankroll-mode-chip");
+  if(modeChip) modeChip.textContent = bankrollState.mode==="half" ? "½ Kelly" : "Full Kelly";
+
+  // restore input without fighting the user
   const input = document.getElementById("bankroll-input");
-  if(input && input !== document.activeElement){
-    input.value = bankrollState.bankroll || "";
-  }
+  if(input && input !== document.activeElement) input.value = bankrollState.bankroll||"";
 
   const br = bankrollState.bankroll;
+
+  // update summary line in collapsed header
+  const summary = document.getElementById("bankroll-summary");
+  if(summary){
+    if(!kellyGames.length){
+      summary.textContent = "No qualifying bets today";
+      summary.classList.remove("has-data");
+    } else if(!br){
+      summary.textContent = `${kellyGames.length} bet${kellyGames.length!==1?"s":""} — enter bankroll to size`;
+      summary.classList.remove("has-data");
+    } else {
+      const totalPctPreview = kellyGames.reduce((s,g)=>s+(bankrollState.mode==="half"?(g.kelly_half_pct||0):(g.kelly_full_pct||0)),0);
+      const totalDollarsPreview = br * totalPctPreview / 100;
+      summary.textContent = `${kellyGames.length} bet${kellyGames.length!==1?"s":""} · $${totalDollarsPreview.toFixed(2)} · ${totalPctPreview.toFixed(1)}% bankroll`;
+      summary.classList.add("has-data");
+    }
+  }
+
   const container = document.getElementById("bankroll-bets");
+  if(!container) return;
 
   if(!kellyGames.length){
-    container.innerHTML = '<p class="sb-bankroll-empty">No Kelly edge bets on today\'s board yet.</p>';
+    container.innerHTML = '<p class="sb-bankroll-empty">No Kelly edge bets meet the ≥2% threshold today.</p>';
     return;
   }
 
-  let totalDollars = 0;
-  let totalPct = 0;
+  let totalDollars = 0, totalPct = 0;
 
   const rows = kellyGames.map((g,i)=>{
     const pct = bankrollState.mode==="half" ? (g.kelly_half_pct||0) : (g.kelly_full_pct||0);
@@ -671,39 +759,55 @@ function renderBankroll(){
     const odds = pickedSide==="home" ? g.vegas_moneyline_home : g.vegas_moneyline_away;
     const matchup = `${t(g.away_team)} @ ${t(g.home_team)}`;
     const gameTime = g.commence_time_utc ? new Date(g.commence_time_utc).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",timeZoneName:"short"}) : "";
-    const dollarDisplay = br
-      ? `<span class="sb-bankroll-bet-dollars">$${dollars.toFixed(2)}</span>`
-      : `<span class="sb-bankroll-bet-dollars is-zero">${pct.toFixed(1)}%</span>`;
+    const strength = betStrength(g.kelly_edge||0);
+    const dollarEl = br
+      ? `<div class="sb-bankroll-bet-dollars">$${dollars.toFixed(2)}</div>`
+      : `<div class="sb-bankroll-bet-dollars no-br">${pct.toFixed(1)}%</div>`;
     return `
-    <div class="sb-bankroll-bet">
-      <span class="sb-bankroll-bet-rank">#${i+1}</span>
+    <div class="sb-bankroll-bet is-${strength}">
+      <div class="sb-bankroll-bet-num">${i+1}</div>
       <div class="sb-bankroll-bet-info">
-        <div class="sb-bankroll-bet-team">${t(g.projected_winner)}</div>
-        <div class="sb-bankroll-bet-meta">${matchup} &bull; ${gameTime}</div>
+        <div class="sb-bankroll-bet-team">${t(g.projected_winner)} <span style="font-weight:500;color:var(--sb-muted)">${fMl(odds)}</span></div>
+        <div class="sb-bankroll-bet-meta">
+          <span class="sb-bankroll-bet-edge">+${(g.kelly_edge*100).toFixed(1)}% edge</span>
+          <span>${matchup}</span>
+          <span>${gameTime}</span>
+        </div>
       </div>
-      <span class="sb-bankroll-bet-odds">${fMl(odds)}</span>
-      <div class="sb-bankroll-bet-amount">
-        <div class="sb-bankroll-bet-pct">+${(g.kelly_edge*100).toFixed(1)}% edge</div>
-        ${dollarDisplay}
+      <div class="sb-bankroll-bet-right">
+        ${dollarEl}
+        <div class="sb-bankroll-bet-pct">${pct.toFixed(1)}% of roll</div>
       </div>
     </div>`;
   }).join("");
 
   const totalRow = `
   <div class="sb-bankroll-total">
-    <span class="sb-bankroll-total-label">${kellyGames.length} bet${kellyGames.length!==1?"s":""} &bull; ${totalPct.toFixed(1)}% deployed</span>
-    <span class="sb-bankroll-total-value">${br ? `$${totalDollars.toFixed(2)} total` : "Enter bankroll →"}</span>
+    <div class="sb-bankroll-total-left"><strong>${kellyGames.length}</strong> bet${kellyGames.length!==1?"s":""} &nbsp;·&nbsp; <strong>${totalPct.toFixed(1)}%</strong> deployed</div>
+    <div class="sb-bankroll-total-right">${br ? `$${totalDollars.toFixed(2)}` : "—"}</div>
   </div>`;
 
   container.innerHTML = `<div class="sb-bankroll-bets">${rows}${totalRow}</div>`;
 }
 
-// Wire up input + mode toggle after DOM ready
+// Wire up interactions after DOM ready
 document.addEventListener("DOMContentLoaded",()=>{
   const input = document.getElementById("bankroll-input");
   const chip = document.getElementById("bankroll-mode-chip");
+  const toggle = document.getElementById("bankroll-toggle");
+
+  if(toggle){
+    toggle.addEventListener("click",e=>{
+      // don't toggle if clicking inside the input
+      if(e.target.closest(".sb-bankroll-input-wrap")) return;
+      bankrollState.open = !bankrollState.open;
+      saveBankroll();
+      renderBankroll();
+    });
+  }
   if(input){
-    input.value = bankrollState.bankroll || "";
+    input.value = bankrollState.bankroll||"";
+    input.addEventListener("click",e=>e.stopPropagation());
     input.addEventListener("input",()=>{
       bankrollState.bankroll = Math.max(0, Number(input.value)||0);
       saveBankroll();
@@ -711,7 +815,8 @@ document.addEventListener("DOMContentLoaded",()=>{
     });
   }
   if(chip){
-    chip.addEventListener("click",()=>{
+    chip.addEventListener("click",e=>{
+      e.stopPropagation();
       bankrollState.mode = bankrollState.mode==="half" ? "full" : "half";
       saveBankroll();
       renderBankroll();
