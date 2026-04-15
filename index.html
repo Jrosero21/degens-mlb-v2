@@ -679,6 +679,7 @@ let state = {data:null,day:"today",filter:"all",expanded:null,chatOpen:false};
 
 // ─── BANKROLL CALCULATOR ───
 const KELLY_MIN_HALF_PCT = 2; // ignore bets below 2% half-Kelly (noise)
+const KELLY_MAX_BET_PCT = 15; // hard cap per bet at 15% of bankroll
 
 let bankrollState = {
   bankroll: Number(localStorage.getItem("br_bankroll")||0),
@@ -733,7 +734,7 @@ function renderBankroll(){
       summary.textContent = `${kellyGames.length} bet${kellyGames.length!==1?"s":""} — enter bankroll to size`;
       summary.classList.remove("has-data");
     } else {
-      const totalPctPreview = kellyGames.reduce((s,g)=>s+(bankrollState.mode==="half"?(g.kelly_half_pct||0):(g.kelly_full_pct||0)),0);
+      const totalPctPreview = kellyGames.reduce((s,g)=>s+Math.min(bankrollState.mode==="half"?(g.kelly_half_pct||0):(g.kelly_full_pct||0),KELLY_MAX_BET_PCT),0);
       const totalDollarsPreview = br * totalPctPreview / 100;
       summary.textContent = `${kellyGames.length} bet${kellyGames.length!==1?"s":""} · $${totalDollarsPreview.toFixed(2)} · ${totalPctPreview.toFixed(1)}% bankroll`;
       summary.classList.add("has-data");
@@ -751,7 +752,9 @@ function renderBankroll(){
   let totalDollars = 0, totalPct = 0;
 
   const rows = kellyGames.map((g,i)=>{
-    const pct = bankrollState.mode==="half" ? (g.kelly_half_pct||0) : (g.kelly_full_pct||0);
+    const rawPct = bankrollState.mode==="half" ? (g.kelly_half_pct||0) : (g.kelly_full_pct||0);
+    const capped = rawPct > KELLY_MAX_BET_PCT;
+    const pct = Math.min(rawPct, KELLY_MAX_BET_PCT);
     const dollars = br ? br * pct / 100 : 0;
     totalDollars += dollars;
     totalPct += pct;
@@ -770,13 +773,14 @@ function renderBankroll(){
         <div class="sb-bankroll-bet-team">${t(g.projected_winner)} <span style="font-weight:500;color:var(--sb-muted)">${fMl(odds)}</span></div>
         <div class="sb-bankroll-bet-meta">
           <span class="sb-bankroll-bet-edge">+${(g.kelly_edge*100).toFixed(1)}% edge</span>
+          ${capped?`<span style="font-size:10px;color:var(--sb-gold);font-weight:600">capped at ${KELLY_MAX_BET_PCT}%</span>`:""}
           <span>${matchup}</span>
           <span>${gameTime}</span>
         </div>
       </div>
       <div class="sb-bankroll-bet-right">
         ${dollarEl}
-        <div class="sb-bankroll-bet-pct">${pct.toFixed(1)}% of roll</div>
+        <div class="sb-bankroll-bet-pct">${pct.toFixed(1)}%${capped?` <span style="text-decoration:line-through;opacity:0.5">${rawPct.toFixed(1)}</span>`:""} of roll</div>
       </div>
     </div>`;
   }).join("");
