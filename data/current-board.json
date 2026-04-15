@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-04-15T03:15:01.137255+00:00",
+    "generatedAt": "2026-04-15T03:20:23.132252+00:00",
     "dbName": "jonnyrosero_score",
     "refreshStartDate": "2026-04-14",
     "refreshDays": 2,
@@ -2447,7 +2447,7 @@
       "projection_stage": "shadow_retrained_2026",
       "actual_away_runs": 9,
       "actual_home_runs": 7,
-      "game_result_status": "Game Over",
+      "game_result_status": "Final",
       "pick_correct": false,
       "market_runline": "TOR -1.5 / MIL +1.5",
       "projected_runline_edge": null,
