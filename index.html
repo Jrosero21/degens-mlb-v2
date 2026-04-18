@@ -1565,68 +1565,55 @@ function generateAIResponse(query){
   // ─── BANKROLL / BET SIZE / KELLY SIZING ───
   const bankrollMatch = q.match(/\$\s*([\d,]+)/)||q.match(/([\d,]+)\s*(?:dollar|bankroll|budget|bank)/);
   if(bankrollMatch || q.includes("bankroll")||q.includes("bet size")||q.includes("how much")||q.includes("kelly")||q.includes("unit")||q.includes("wager")||q.includes("sizing")||q.includes("allocat")) {
-    const bankroll = bankrollMatch ? parseFloat(bankrollMatch[1].replace(/,/g,"")) : 500;
-    const withEdge = pickPool.filter(g=>g.has_kelly_edge && g.kelly_full_pct > 0).sort((a,b)=>(b.kelly_full_pct||0)-(a.kelly_full_pct||0));
+    // Use calculator state as the single source of truth
+    const br = bankrollMatch ? parseFloat(bankrollMatch[1].replace(/,/g,"")) : bankrollState.bankroll;
+    const bankroll = br || 0;
+    const mode = bankrollState.mode;       // "half" or "full"
+    const capPct = bankrollState.cap;      // 0 = no cap, else % of bankroll
 
-    if(!withEdge.length) return pickPool.length ? `No upcoming games with positive Kelly edge right now.` : `All games have already started or finished -- no upcoming games to size bets for.`;
+    const todayDate = state.data?.meta?.boardDate;
+    const allToday = (state.data?.games||[]).filter(g=>(g.board_display_date||g.game_date)===todayDate);
+    const withEdge = allToday
+      .filter(g=>g.has_kelly_edge && (g.kelly_half_pct||0)>=KELLY_MIN_HALF_PCT && !g.actual_away_runs)
+      .sort((a,b)=>(b.kelly_edge||0)-(a.kelly_edge||0));
 
-    // Detect which Kelly fraction the user wants
-    let kellyFraction = 0.5; // default half Kelly
-    let kellyName = "Half Kelly";
-    if(q.includes("full kelly")||q.includes("full percentage")||q.includes("full %")||q.includes("full fraction")){
-      kellyFraction = 1.0; kellyName = "Full Kelly";
-    } else if(q.includes("quarter")||q.includes("1/4")){
-      kellyFraction = 0.25; kellyName = "Quarter Kelly";
-    } else if(q.includes("tenth")||q.includes("1/10")){
-      kellyFraction = 0.1; kellyName = "Tenth Kelly";
-    }
-    const maxPct = kellyFraction >= 1.0 ? 0.30 : kellyFraction >= 0.5 ? 0.15 : 0.10; // cap per bet
+    if(!withEdge.length) return `No Kelly edge bets (≥2% half-Kelly) on today's board yet.`;
 
-    let resp = `<strong>${kellyName} Sizing -- $${bankroll.toLocaleString()} Bankroll:</strong><br><br>`;
-    let totalAllocated = 0;
-    let totalBets = 0;
+    // Compute raw sizes with per-bet cap
+    const rawSizes = withEdge.map(g=>{
+      const raw = mode==="half" ? (g.kelly_half_pct||0) : (g.kelly_full_pct||0);
+      return Math.min(raw, KELLY_MAX_BET_PCT);
+    });
+    const rawTotal = rawSizes.reduce((s,v)=>s+v,0);
 
-    withEdge.forEach(g => {
-      const rawPct = (g.kelly_full_pct * kellyFraction) / 100;
-      const cappedPct = Math.min(rawPct, maxPct);
-      const betAmount = Math.max(Math.round(bankroll * cappedPct), 5);
-      if(betAmount < 5) return;
+    // Apply total exposure cap
+    const scaled = capPct > 0 && rawTotal > capPct;
+    const scaleFactor = scaled ? capPct / rawTotal : 1;
+    const finalSizes = rawSizes.map(v=>v*scaleFactor);
+    const finalTotal = finalSizes.reduce((s,v)=>s+v,0);
 
+    const modeName = mode==="half" ? "Half Kelly" : "Full Kelly";
+    const capNote = capPct > 0 ? ` · ${capPct}% total cap` : " · No cap";
+    resp = `<strong>Bankroll Calculator — ${modeName}${capNote}</strong><br>`;
+    resp += bankroll ? `<strong>Bankroll: $${bankroll.toLocaleString()}</strong><br><br>` : `<em>No bankroll set in calculator — showing % sizes only. Set your bankroll in the calculator above for dollar amounts.</em><br><br>`;
+
+    withEdge.forEach((g,i)=>{
+      const pct = finalSizes[i];
+      const dollars = bankroll ? bankroll * pct / 100 : null;
       const pickedOdds = g.projected_winner_side==="home"?g.vegas_moneyline_home:g.vegas_moneyline_away;
-      const potentialWin = pickedOdds > 0 ? Math.round(betAmount * pickedOdds / 100) : Math.round(betAmount * 100 / Math.abs(pickedOdds));
-
-      totalAllocated += betAmount;
-      totalBets++;
-
-      const strength = cappedPct >= 0.15 ? "Strong" : cappedPct >= 0.05 ? "Moderate" : "Small";
-      resp += `<strong>${t(g.projected_winner)}</strong> ML (${fMl(pickedOdds)}) -- ${t(g.away_team)} @ ${t(g.home_team)}<br>`;
-      resp += `Bet: <strong>$${betAmount}</strong> (${(cappedPct*100).toFixed(1)}%) | Edge: +${(g.kelly_edge*100).toFixed(1)}% | To win: $${potentialWin} | ${strength}<br>`;
-      resp += `Confidence: ${fP(g.projected_confidence_pct)} | Track: ${fP(g.historical_bucket_accuracy_pct)}<br><br>`;
+      const potentialWin = dollars && pickedOdds ? (pickedOdds > 0 ? Math.round(dollars * pickedOdds / 100) : Math.round(dollars * 100 / Math.abs(pickedOdds))) : null;
+      const strength = betStrength(g.kelly_edge||0);
+      const strengthLabel = strength==="strong"?"Strong ●":strength==="moderate"?"Moderate ●":"Small ●";
+      resp += `<strong>${t(g.projected_winner)}</strong> ML (${fMl(pickedOdds)}) — ${t(g.away_team)} @ ${t(g.home_team)}<br>`;
+      resp += `Bet: <strong>${dollars!=null?`$${dollars.toFixed(2)}`:"--"}</strong> (${pct.toFixed(1)}%) | Edge: +${(g.kelly_edge*100).toFixed(1)}% | ${strengthLabel}`;
+      resp += potentialWin ? ` | To win: $${potentialWin}` : "";
+      resp += `<br><br>`;
     });
 
-    const pctUsed = ((totalAllocated / bankroll) * 100).toFixed(1);
-    resp += `<strong>Total:</strong> $${totalAllocated} across ${totalBets} bet${totalBets!==1?"s":""} (${pctUsed}% of bankroll)<br>`;
-    resp += `<strong>Reserve:</strong> $${(bankroll - totalAllocated).toLocaleString()} stays in the bankroll<br><br>`;
-
-    // Risk note based on fraction used
-    if(kellyFraction >= 1.0) {
-      resp += `<em>Full Kelly is mathematically optimal but extremely volatile -- most sharps use half or quarter Kelly. A bad day at full Kelly can wipe a big chunk of your bankroll. Consider scaling down.</em>`;
-    } else if(parseFloat(pctUsed) > 40) {
-      resp += `<em>Heads up: you'd be deploying ${pctUsed}% of your bankroll today. That's aggressive. Consider scaling down to quarter Kelly (halve all bet sizes) if you want to play it safer.</em>`;
-    } else if(parseFloat(pctUsed) > 20) {
-      resp += `<em>Solid allocation. ${kellyName} keeps the variance manageable while still capitalizing on the edge the model sees.</em>`;
-    } else {
-      resp += `<em>Conservative day -- not a lot of strong edges. The model is being selective, which is usually a good sign for long-term profitability.</em>`;
-    }
-
-    // If full kelly, show the half kelly alternative
-    if(kellyFraction >= 1.0) {
-      const halfTotal = withEdge.reduce((s,g) => {
-        const pct = Math.min((g.kelly_full_pct*0.5)/100, 0.15);
-        return s + Math.max(Math.round(bankroll*pct), 5);
-      }, 0);
-      resp += `<br><br><em>For comparison, half Kelly would deploy $${halfTotal} (${((halfTotal/bankroll)*100).toFixed(1)}%) -- same edge, half the risk.</em>`;
-    }
+    const totalDollars = bankroll ? bankroll * finalTotal / 100 : null;
+    resp += `<strong>Total: ${totalDollars!=null?`$${totalDollars.toFixed(2)}`:"--"} across ${withEdge.length} bet${withEdge.length!==1?"s":""} (${finalTotal.toFixed(1)}% of bankroll)</strong><br>`;
+    if(bankroll) resp += `Reserve: $${(bankroll - (totalDollars||0)).toFixed(2)} stays in bankroll<br>`;
+    if(scaled) resp += `<br><em>All bets scaled down proportionally to fit the ${capPct}% total cap.</em>`;
     return resp;
   }
 
