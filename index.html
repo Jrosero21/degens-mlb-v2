@@ -456,6 +456,16 @@ a{color:inherit;text-decoration:none}
 }
 .sb-bankroll-mode-chip:hover{background:rgba(168,85,247,0.16)}
 .sb-bankroll-threshold{font-size:11px;color:var(--sb-muted);margin-left:auto}
+.sb-bankroll-cap-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid var(--sb-border);margin-bottom:10px}
+.sb-bankroll-cap-label{font-size:11px;color:var(--sb-muted);white-space:nowrap;margin-right:2px}
+.sb-bankroll-cap-opt{
+  font-size:11px;font-weight:600;padding:4px 9px;border-radius:99px;
+  background:var(--sb-surface-3);border:1px solid var(--sb-border);
+  color:var(--sb-muted);cursor:pointer;white-space:nowrap;transition:all 0.15s;
+}
+.sb-bankroll-cap-opt:hover{border-color:rgba(168,85,247,0.3);color:var(--sb-text)}
+.sb-bankroll-cap-opt.is-active{background:rgba(168,85,247,0.12);border-color:rgba(168,85,247,0.35);color:var(--sb-purple)}
+.sb-bankroll-scale-note{font-size:10px;color:var(--sb-gold);margin-left:4px;font-weight:600}
 
 /* bet rows */
 .sb-bankroll-bets{display:flex;flex-direction:column;gap:5px;margin-top:2px}
@@ -583,7 +593,16 @@ a{color:inherit;text-decoration:none}
           <input class="sb-bankroll-input" id="bankroll-input" type="number" min="0" step="1" placeholder="0" inputmode="numeric"/>
         </div>
         <button class="sb-bankroll-mode-chip" id="bankroll-mode-chip">½ Kelly</button>
-        <span class="sb-bankroll-threshold" id="bankroll-threshold">≥2% half-Kelly shown</span>
+        <span class="sb-bankroll-threshold">≥2% half-Kelly shown</span>
+      </div>
+      <div class="sb-bankroll-cap-row">
+        <span class="sb-bankroll-cap-label">Total exposure cap:</span>
+        <button class="sb-bankroll-cap-opt" data-cap="0">No Cap</button>
+        <button class="sb-bankroll-cap-opt" data-cap="20">20%</button>
+        <button class="sb-bankroll-cap-opt" data-cap="25">25%</button>
+        <button class="sb-bankroll-cap-opt" data-cap="30">30%</button>
+        <button class="sb-bankroll-cap-opt" data-cap="40">40%</button>
+        <button class="sb-bankroll-cap-opt" data-cap="50">50%</button>
       </div>
       <div id="bankroll-bets"></div>
     </div>
@@ -684,13 +703,15 @@ const KELLY_MAX_BET_PCT = 15; // hard cap per bet at 15% of bankroll
 let bankrollState = {
   bankroll: Number(localStorage.getItem("br_bankroll")||0),
   mode: localStorage.getItem("br_mode")||"half",
-  open: localStorage.getItem("br_open")==="1"
+  open: localStorage.getItem("br_open")==="1",
+  cap: Number(localStorage.getItem("br_cap")||25)  // 0 = no cap, otherwise % of bankroll
 };
 
 function saveBankroll(){
   localStorage.setItem("br_bankroll", bankrollState.bankroll);
   localStorage.setItem("br_mode", bankrollState.mode);
   localStorage.setItem("br_open", bankrollState.open?"1":"0");
+  localStorage.setItem("br_cap", bankrollState.cap);
 }
 
 function betStrength(edge){
@@ -724,6 +745,25 @@ function renderBankroll(){
 
   const br = bankrollState.bankroll;
 
+  // highlight active cap button
+  document.querySelectorAll(".sb-bankroll-cap-opt").forEach(btn=>{
+    btn.classList.toggle("is-active", Number(btn.dataset.cap)===bankrollState.cap);
+  });
+
+  // compute raw bet sizes (per-bet 15% cap already applied)
+  const rawSizes = kellyGames.map(g=>{
+    const raw = bankrollState.mode==="half" ? (g.kelly_half_pct||0) : (g.kelly_full_pct||0);
+    return Math.min(raw, KELLY_MAX_BET_PCT);
+  });
+  const rawTotal = rawSizes.reduce((s,v)=>s+v, 0);
+
+  // apply total exposure cap — scale all bets proportionally if needed
+  const capPct = bankrollState.cap; // 0 = no cap
+  const scaled = capPct > 0 && rawTotal > capPct;
+  const scaleFactor = scaled ? capPct / rawTotal : 1;
+  const finalSizes = rawSizes.map(v => v * scaleFactor);
+  const finalTotal = finalSizes.reduce((s,v)=>s+v, 0);
+
   // update summary line in collapsed header
   const summary = document.getElementById("bankroll-summary");
   if(summary){
@@ -734,9 +774,9 @@ function renderBankroll(){
       summary.textContent = `${kellyGames.length} bet${kellyGames.length!==1?"s":""} — enter bankroll to size`;
       summary.classList.remove("has-data");
     } else {
-      const totalPctPreview = kellyGames.reduce((s,g)=>s+Math.min(bankrollState.mode==="half"?(g.kelly_half_pct||0):(g.kelly_full_pct||0),KELLY_MAX_BET_PCT),0);
-      const totalDollarsPreview = br * totalPctPreview / 100;
-      summary.textContent = `${kellyGames.length} bet${kellyGames.length!==1?"s":""} · $${totalDollarsPreview.toFixed(2)} · ${totalPctPreview.toFixed(1)}% bankroll`;
+      const totalDollarsPreview = br * finalTotal / 100;
+      const capNote = scaled ? ` (capped at ${capPct}%)` : "";
+      summary.textContent = `${kellyGames.length} bet${kellyGames.length!==1?"s":""} · $${totalDollarsPreview.toFixed(2)} · ${finalTotal.toFixed(1)}% bankroll${capNote}`;
       summary.classList.add("has-data");
     }
   }
@@ -749,15 +789,14 @@ function renderBankroll(){
     return;
   }
 
-  let totalDollars = 0, totalPct = 0;
+  let totalDollars = 0;
 
   const rows = kellyGames.map((g,i)=>{
-    const rawPct = bankrollState.mode==="half" ? (g.kelly_half_pct||0) : (g.kelly_full_pct||0);
-    const capped = rawPct > KELLY_MAX_BET_PCT;
-    const pct = Math.min(rawPct, KELLY_MAX_BET_PCT);
+    const rawPct = rawSizes[i];
+    const pct = finalSizes[i];
+    const betCapped = rawSizes[i] < (bankrollState.mode==="half"?(g.kelly_half_pct||0):(g.kelly_full_pct||0));
     const dollars = br ? br * pct / 100 : 0;
     totalDollars += dollars;
-    totalPct += pct;
     const pickedSide = g.projected_winner_side==="home" ? "home" : "away";
     const odds = pickedSide==="home" ? g.vegas_moneyline_home : g.vegas_moneyline_away;
     const matchup = `${t(g.away_team)} @ ${t(g.home_team)}`;
@@ -766,6 +805,8 @@ function renderBankroll(){
     const dollarEl = br
       ? `<div class="sb-bankroll-bet-dollars">$${dollars.toFixed(2)}</div>`
       : `<div class="sb-bankroll-bet-dollars no-br">${pct.toFixed(1)}%</div>`;
+    const scaledNote = scaled ? `<span class="sb-bankroll-scale-note">scaled</span>` : "";
+    const cappedNote = betCapped && !scaled ? `<span style="font-size:10px;color:var(--sb-gold);font-weight:600">capped at ${KELLY_MAX_BET_PCT}%</span>` : "";
     return `
     <div class="sb-bankroll-bet is-${strength}">
       <div class="sb-bankroll-bet-num">${i+1}</div>
@@ -773,21 +814,22 @@ function renderBankroll(){
         <div class="sb-bankroll-bet-team">${t(g.projected_winner)} <span style="font-weight:500;color:var(--sb-muted)">${fMl(odds)}</span></div>
         <div class="sb-bankroll-bet-meta">
           <span class="sb-bankroll-bet-edge">+${(g.kelly_edge*100).toFixed(1)}% edge</span>
-          ${capped?`<span style="font-size:10px;color:var(--sb-gold);font-weight:600">capped at ${KELLY_MAX_BET_PCT}%</span>`:""}
+          ${cappedNote}${scaledNote}
           <span>${matchup}</span>
           <span>${gameTime}</span>
         </div>
       </div>
       <div class="sb-bankroll-bet-right">
         ${dollarEl}
-        <div class="sb-bankroll-bet-pct">${pct.toFixed(1)}%${capped?` <span style="text-decoration:line-through;opacity:0.5">${rawPct.toFixed(1)}</span>`:""} of roll</div>
+        <div class="sb-bankroll-bet-pct">${pct.toFixed(1)}% of roll</div>
       </div>
     </div>`;
   }).join("");
 
+  const capLabel = scaled ? `<span style="color:var(--sb-gold);font-size:11px">scaled to ${capPct}% cap</span>` : "";
   const totalRow = `
   <div class="sb-bankroll-total">
-    <div class="sb-bankroll-total-left"><strong>${kellyGames.length}</strong> bet${kellyGames.length!==1?"s":""} &nbsp;·&nbsp; <strong>${totalPct.toFixed(1)}%</strong> deployed</div>
+    <div class="sb-bankroll-total-left"><strong>${kellyGames.length}</strong> bet${kellyGames.length!==1?"s":""} &nbsp;·&nbsp; <strong>${finalTotal.toFixed(1)}%</strong> deployed &nbsp;${capLabel}</div>
     <div class="sb-bankroll-total-right">${br ? `$${totalDollars.toFixed(2)}` : "—"}</div>
   </div>`;
 
@@ -826,6 +868,14 @@ document.addEventListener("DOMContentLoaded",()=>{
       renderBankroll();
     });
   }
+  document.querySelectorAll(".sb-bankroll-cap-opt").forEach(btn=>{
+    btn.addEventListener("click",e=>{
+      e.stopPropagation();
+      bankrollState.cap = Number(btn.dataset.cap);
+      saveBankroll();
+      renderBankroll();
+    });
+  });
 });
 
 // ─── RENDER HEADER ───
