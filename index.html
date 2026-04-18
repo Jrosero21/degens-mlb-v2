@@ -593,7 +593,7 @@ a{color:inherit;text-decoration:none}
           <input class="sb-bankroll-input" id="bankroll-input" type="number" min="0" step="1" placeholder="0" inputmode="numeric"/>
         </div>
         <button class="sb-bankroll-mode-chip" id="bankroll-mode-chip">½ Kelly</button>
-        <span class="sb-bankroll-threshold">≥2% half-Kelly shown</span>
+        <span class="sb-bankroll-threshold" id="bankroll-threshold-label">≥5% half-Kelly shown</span>
       </div>
       <div class="sb-bankroll-cap-row">
         <span class="sb-bankroll-cap-label">Total exposure cap:</span>
@@ -697,8 +697,34 @@ const fKelly = v => v==null?"--":`${Number(v).toFixed(1)}%`;
 let state = {data:null,day:"today",filter:"all",expanded:null,chatOpen:false};
 
 // ─── BANKROLL CALCULATOR ───
-const KELLY_MIN_HALF_PCT = 2; // ignore bets below 2% half-Kelly (noise)
 const KELLY_MAX_BET_PCT = 15; // hard cap per bet at 15% of bankroll
+
+// Dynamic minimum half-Kelly threshold based on season moneyline accuracy.
+// Kelly is only reliable when the model has a demonstrated edge.
+// Breakeven on -110 lines = 52.38%. Below that, Kelly should not be used.
+//
+// Accuracy → min half-Kelly %
+// < 53%   → 10%  (model near breakeven, only extreme edges qualify)
+// 53-54%  →  7%
+// 54-55%  →  5%  (current ~54.4%)
+// 55-56%  →  4%
+// 56-57%  →  3%
+// 57-58%  →  2%
+// >= 58%  →  1%  (model is sharp, open up more bets)
+function kellyMinThreshold(accuracyPct){
+  if(accuracyPct==null) return 5; // default if no data
+  if(accuracyPct < 53)  return 10;
+  if(accuracyPct < 54)  return 7;
+  if(accuracyPct < 55)  return 5;
+  if(accuracyPct < 56)  return 4;
+  if(accuracyPct < 57)  return 3;
+  if(accuracyPct < 58)  return 2;
+  return 1;
+}
+
+function getKellyMinPct(){
+  return kellyMinThreshold(state.data?.accuracy?.lanes?.moneyline?.accuracyPct);
+}
 
 let bankrollState = {
   bankroll: Number(localStorage.getItem("br_bankroll")||0),
@@ -726,7 +752,7 @@ function renderBankroll(){
   const boardDate = state.data?.meta?.boardDate;
   const todayGames = boardDate ? games.filter(g=>(g.board_display_date||g.game_date)===boardDate) : games;
   const kellyGames = todayGames
-    .filter(g=>g.has_kelly_edge && (g.kelly_half_pct||0)>=KELLY_MIN_HALF_PCT && !g.actual_away_runs)
+    .filter(g=>g.has_kelly_edge && (g.kelly_half_pct||0)>=getKellyMinPct() && !g.actual_away_runs)
     .sort((a,b)=>(b.kelly_edge||0)-(a.kelly_edge||0));
 
   section.hidden = false;
@@ -738,6 +764,17 @@ function renderBankroll(){
   // update mode chip
   const modeChip = document.getElementById("bankroll-mode-chip");
   if(modeChip) modeChip.textContent = bankrollState.mode==="half" ? "½ Kelly" : "Full Kelly";
+
+  // update dynamic threshold label
+  const minPct = getKellyMinPct();
+  const accPct = state.data?.accuracy?.lanes?.moneyline?.accuracyPct;
+  const thresholdLabel = document.getElementById("bankroll-threshold-label");
+  if(thresholdLabel){
+    thresholdLabel.textContent = accPct!=null
+      ? `≥${minPct}% half-Kelly (ML ${fP(accPct)})`
+      : `≥${minPct}% half-Kelly`;
+    thresholdLabel.style.color = accPct!=null && accPct < 55 ? "var(--sb-gold)" : "var(--sb-muted)";
+  }
 
   // restore input without fighting the user
   const input = document.getElementById("bankroll-input");
@@ -785,7 +822,9 @@ function renderBankroll(){
   if(!container) return;
 
   if(!kellyGames.length){
-    container.innerHTML = '<p class="sb-bankroll-empty">No Kelly edge bets meet the ≥2% threshold today.</p>';
+    const minP = getKellyMinPct();
+    const accP = state.data?.accuracy?.lanes?.moneyline?.accuracyPct;
+    container.innerHTML = `<p class="sb-bankroll-empty">No bets meet the ≥${minP}% half-Kelly threshold today${accP!=null?` (model ML accuracy: ${fP(accP)})`:""} .</p>`;
     return;
   }
 
@@ -1574,7 +1613,7 @@ function generateAIResponse(query){
     const todayDate = state.data?.meta?.boardDate;
     const allToday = (state.data?.games||[]).filter(g=>(g.board_display_date||g.game_date)===todayDate);
     const withEdge = allToday
-      .filter(g=>g.has_kelly_edge && (g.kelly_half_pct||0)>=KELLY_MIN_HALF_PCT && !g.actual_away_runs)
+      .filter(g=>g.has_kelly_edge && (g.kelly_half_pct||0)>=getKellyMinPct() && !g.actual_away_runs)
       .sort((a,b)=>(b.kelly_edge||0)-(a.kelly_edge||0));
 
     if(!withEdge.length) return `No Kelly edge bets (≥2% half-Kelly) on today's board yet.`;
