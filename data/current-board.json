@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-04-19T19:08:39.064616+00:00",
+    "generatedAt": "2026-04-19T19:11:03.866363+00:00",
     "dbName": "jonnyrosero_score",
     "refreshStartDate": "2026-04-19",
     "refreshDays": 2,
@@ -426,8 +426,8 @@
       "vegas_total_line": 11.5,
       "vegas_spread_away": -2.5,
       "vegas_spread_home": 1.5,
-      "away_spread_price_american": -101.0,
-      "home_spread_price_american": 135.0,
+      "away_spread_price_american": -120.0,
+      "home_spread_price_american": 159.0,
       "projected_ou_pick": "UNDER",
       "projected_total_edge": -3.857,
       "projected_ou_prob": 0.91211,
@@ -437,8 +437,8 @@
       "projected_runline_confidence_pct": 70.0,
       "away_cover_prob": 0.29965,
       "home_cover_prob": 0.70035,
-      "vegas_moneyline_away": -215.0,
-      "vegas_moneyline_home": 200.0,
+      "vegas_moneyline_away": -271.0,
+      "vegas_moneyline_home": 241.0,
       "market_favorite": "LAN",
       "market_favorite_side": "away",
       "model_vs_market": "AGREE",
@@ -464,7 +464,7 @@
       "total_roi_play": true,
       "kelly_full_pct": 0,
       "kelly_half_pct": 0,
-      "kelly_edge": -0.0744,
+      "kelly_edge": -0.1223,
       "has_kelly_edge": false
     },
     {
