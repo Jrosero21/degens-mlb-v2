@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-04-19T02:39:34.081886+00:00",
+    "generatedAt": "2026-04-19T02:44:57.725926+00:00",
     "dbName": "jonnyrosero_score",
     "refreshStartDate": "2026-04-18",
     "refreshDays": 2,
@@ -2385,7 +2385,7 @@
       "projection_stage": "early",
       "actual_away_runs": 2,
       "actual_home_runs": 6,
-      "game_result_status": "Game Over",
+      "game_result_status": "Final",
       "pick_correct": false,
       "market_runline": "TOR -1.5 / AZ -1.5",
       "projected_runline_edge": 0.659,
@@ -3111,7 +3111,7 @@
       "projection_stage": "early",
       "actual_away_runs": 3,
       "actual_home_runs": 7,
-      "game_result_status": "Game Over",
+      "game_result_status": "Final",
       "pick_correct": false,
       "market_runline": "TEX +1.5 / SEA -1.5",
       "projected_runline_edge": 0.425,
