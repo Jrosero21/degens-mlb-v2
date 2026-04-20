@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-04-20T03:40:00.189852+00:00",
+    "generatedAt": "2026-04-20T03:57:17.100163+00:00",
     "dbName": "jonnyrosero_score",
     "refreshStartDate": "2026-04-19",
     "refreshDays": 2,
@@ -39,7 +39,10 @@
     },
     "boardDate": "2026-04-19",
     "boardTimezone": "America/Los_Angeles",
-    "boardGamesView": "v_ui_scoreboard_all_games_active_v1"
+    "boardGamesView": "v_ui_scoreboard_all_games_active_v1",
+    "mlAccuracyPct": 52.7,
+    "mlTripWirePct": 55.0,
+    "mlSuppressed": true
   },
   "accuracy": {
     "season": "2026 season",
@@ -485,7 +488,7 @@
       "vegas_total_line": 8.0,
       "vegas_spread_away": -1.5,
       "vegas_spread_home": 1.5,
-      "away_spread_price_american": 150.0,
+      "away_spread_price_american": 146.0,
       "home_spread_price_american": -170.0,
       "projected_ou_pick": "UNDER",
       "projected_total_edge": -2.41,
@@ -548,7 +551,7 @@
       "vegas_spread_away": -1.5,
       "vegas_spread_home": -1.5,
       "away_spread_price_american": 165.0,
-      "home_spread_price_american": 165.0,
+      "home_spread_price_american": 160.0,
       "projected_ou_pick": "UNDER",
       "projected_total_edge": -2.865,
       "projected_ou_prob": 0.887444,
