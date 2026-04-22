@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-04-22T23:38:04.170050+00:00",
+    "generatedAt": "2026-04-22T23:41:51.470192+00:00",
     "dbName": "jonnyrosero_score",
     "refreshStartDate": "2026-04-22",
     "refreshDays": 2,
@@ -190,10 +190,10 @@
       "matchup_display": "PHI at CHN",
       "projected_winner": "CHN",
       "projected_winner_side": "home",
-      "projected_winner_prob": 0.5596,
+      "projected_winner_prob": 0.5595,
       "projected_confidence_pct": 56.0,
-      "away_win_prob": 0.4404,
-      "home_win_prob": 0.5596,
+      "away_win_prob": 0.4405,
+      "home_win_prob": 0.5595,
       "projected_away_runs": 3.277,
       "projected_home_runs": 4.312,
       "projected_score_diff": 1.035,
@@ -239,7 +239,7 @@
       "total_roi_play": false,
       "kelly_full_pct": 0,
       "kelly_half_pct": 0,
-      "kelly_edge": -0.0645,
+      "kelly_edge": -0.0646,
       "has_kelly_edge": false
     },
     {
