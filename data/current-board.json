@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-04-22T23:09:28.176228+00:00",
+    "generatedAt": "2026-04-22T23:11:18.891960+00:00",
     "dbName": "jonnyrosero_score",
     "refreshStartDate": "2026-04-22",
     "refreshDays": 2,
@@ -562,10 +562,10 @@
       "matchup_display": "MIN at NYN",
       "projected_winner": "NYN",
       "projected_winner_side": "home",
-      "projected_winner_prob": 0.6246,
-      "projected_confidence_pct": 62.5,
-      "away_win_prob": 0.3754,
-      "home_win_prob": 0.6246,
+      "projected_winner_prob": 0.5974,
+      "projected_confidence_pct": 59.7,
+      "away_win_prob": 0.4026,
+      "home_win_prob": 0.5974,
       "projected_away_runs": 3.959,
       "projected_home_runs": 3.682,
       "projected_score_diff": 0.277,
@@ -609,10 +609,10 @@
       "moneyline_roi_play": false,
       "runline_roi_play": true,
       "total_roi_play": false,
-      "kelly_full_pct": 6.15,
-      "kelly_half_pct": 3.07,
-      "kelly_edge": 0.0246,
-      "has_kelly_edge": true
+      "kelly_full_pct": 0,
+      "kelly_half_pct": 0,
+      "kelly_edge": -0.0026,
+      "has_kelly_edge": false
     },
     {
       "gamePk": 822913,
