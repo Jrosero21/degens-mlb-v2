@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-04-24T22:15:31.312710+00:00",
+    "generatedAt": "2026-04-24T22:19:00.924958+00:00",
     "dbName": "jonnyrosero_score",
     "refreshStartDate": "2026-04-24",
     "refreshDays": 2,
@@ -95,7 +95,7 @@
   },
   "featured": [
     {
-      "id": 2188,
+      "id": 2191,
       "run_date": "2026-04-24",
       "game_date": "2026-04-24",
       "board_display_date": "2026-04-24",
@@ -133,11 +133,11 @@
       "model_version": "score_model_2026_xgb_calibrated",
       "projection_stage": "shadow_retrained",
       "source_view": "v_score_predictions_board_active_v1",
-      "created_at": "2026-04-24T18:14:30",
-      "updated_at": "2026-04-24T18:14:30"
+      "created_at": "2026-04-24T18:18:35",
+      "updated_at": "2026-04-24T18:18:35"
     },
     {
-      "id": 2187,
+      "id": 2190,
       "run_date": "2026-04-24",
       "game_date": "2026-04-24",
       "board_display_date": "2026-04-24",
@@ -175,8 +175,8 @@
       "model_version": "score_model_2026_xgb_calibrated",
       "projection_stage": "shadow_retrained",
       "source_view": "v_score_predictions_board_active_v1",
-      "created_at": "2026-04-24T18:14:30",
-      "updated_at": "2026-04-24T18:14:30"
+      "created_at": "2026-04-24T18:18:35",
+      "updated_at": "2026-04-24T18:18:35"
     }
   ],
   "games": [
@@ -771,7 +771,7 @@
       "away_cover_prob": 0.264418,
       "home_cover_prob": 0.735582,
       "vegas_moneyline_away": -106.0,
-      "vegas_moneyline_home": 100.0,
+      "vegas_moneyline_home": 102.0,
       "market_favorite": "MIA",
       "market_favorite_side": "away",
       "model_vs_market": "DISAGREE",
@@ -795,9 +795,9 @@
       "moneyline_roi_play": false,
       "runline_roi_play": true,
       "total_roi_play": false,
-      "kelly_full_pct": 13.26,
-      "kelly_half_pct": 6.63,
-      "kelly_edge": 0.0663,
+      "kelly_full_pct": 14.11,
+      "kelly_half_pct": 7.06,
+      "kelly_edge": 0.0713,
       "has_kelly_edge": true
     },
     {
@@ -1018,7 +1018,7 @@
       "projected_runline_confidence_pct": 70.7,
       "away_cover_prob": 0.706989,
       "home_cover_prob": 0.293011,
-      "vegas_moneyline_away": 123.0,
+      "vegas_moneyline_away": 124.0,
       "vegas_moneyline_home": -134.0,
       "market_favorite": "TBA",
       "market_favorite_side": "home",
