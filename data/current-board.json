@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-04-24T22:24:40.053209+00:00",
+    "generatedAt": "2026-04-24T22:28:08.930295+00:00",
     "dbName": "jonnyrosero_score",
     "refreshStartDate": "2026-04-24",
     "refreshDays": 2,
@@ -95,7 +95,7 @@
   },
   "featured": [
     {
-      "id": 2194,
+      "id": 2197,
       "run_date": "2026-04-24",
       "game_date": "2026-04-24",
       "board_display_date": "2026-04-24",
@@ -126,18 +126,18 @@
       "projected_ou_pick": "UNDER",
       "projected_total_edge": -0.61,
       "vegas_moneyline_away": 123,
-      "vegas_moneyline_home": -126,
+      "vegas_moneyline_home": -127,
       "market_favorite": "TEX",
       "market_favorite_side": "home",
       "model_vs_market": "AGREE",
       "model_version": "score_model_2026_xgb_calibrated",
       "projection_stage": "shadow_retrained",
       "source_view": "v_score_predictions_board_active_v1",
-      "created_at": "2026-04-24T18:23:49",
-      "updated_at": "2026-04-24T18:23:49"
+      "created_at": "2026-04-24T18:27:43",
+      "updated_at": "2026-04-24T18:27:43"
     },
     {
-      "id": 2193,
+      "id": 2196,
       "run_date": "2026-04-24",
       "game_date": "2026-04-24",
       "board_display_date": "2026-04-24",
@@ -175,8 +175,8 @@
       "model_version": "score_model_2026_xgb_calibrated",
       "projection_stage": "shadow_retrained",
       "source_view": "v_score_predictions_board_active_v1",
-      "created_at": "2026-04-24T18:23:49",
-      "updated_at": "2026-04-24T18:23:49"
+      "created_at": "2026-04-24T18:27:43",
+      "updated_at": "2026-04-24T18:27:43"
     }
   ],
   "games": [
@@ -585,7 +585,7 @@
       "away_cover_prob": 0.264135,
       "home_cover_prob": 0.735865,
       "vegas_moneyline_away": -145.0,
-      "vegas_moneyline_home": 134.0,
+      "vegas_moneyline_home": 135.0,
       "market_favorite": "NYA",
       "market_favorite_side": "away",
       "model_vs_market": "DISAGREE",
@@ -609,9 +609,9 @@
       "moneyline_roi_play": false,
       "runline_roi_play": true,
       "total_roi_play": true,
-      "kelly_full_pct": 16.76,
-      "kelly_half_pct": 8.38,
-      "kelly_edge": 0.0959,
+      "kelly_full_pct": 17.02,
+      "kelly_half_pct": 8.51,
+      "kelly_edge": 0.0978,
       "has_kelly_edge": true
     },
     {
@@ -635,7 +635,7 @@
       "vegas_total_line": 9.5,
       "vegas_spread_away": -1.5,
       "vegas_spread_home": -1.5,
-      "away_spread_price_american": 160.0,
+      "away_spread_price_american": 164.0,
       "home_spread_price_american": 165.0,
       "projected_ou_pick": "UNDER",
       "projected_total_edge": -2.14,
@@ -709,7 +709,7 @@
       "away_cover_prob": 0.69201,
       "home_cover_prob": 0.30799,
       "vegas_moneyline_away": 123.0,
-      "vegas_moneyline_home": -126.0,
+      "vegas_moneyline_home": -127.0,
       "market_favorite": "TEX",
       "market_favorite_side": "home",
       "model_vs_market": "AGREE",
@@ -735,7 +735,7 @@
       "total_roi_play": true,
       "kelly_full_pct": 0,
       "kelly_half_pct": 0,
-      "kelly_edge": -0.0297,
+      "kelly_edge": -0.0317,
       "has_kelly_edge": false
     },
     {
@@ -832,7 +832,7 @@
       "projected_runline_confidence_pct": 72.7,
       "away_cover_prob": 0.272975,
       "home_cover_prob": 0.727025,
-      "vegas_moneyline_away": -112.0,
+      "vegas_moneyline_away": -110.0,
       "vegas_moneyline_home": 102.0,
       "market_favorite": "DET",
       "market_favorite_side": "away",
@@ -945,7 +945,7 @@
       "vegas_total_line": 8.5,
       "vegas_spread_away": -1.5,
       "vegas_spread_home": -1.5,
-      "away_spread_price_american": 154.0,
+      "away_spread_price_american": 156.0,
       "home_spread_price_american": 166.0,
       "projected_ou_pick": "UNDER",
       "projected_total_edge": -1.223,
