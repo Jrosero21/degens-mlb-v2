@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-04-24T22:34:10.040271+00:00",
+    "generatedAt": "2026-04-24T22:37:39.092735+00:00",
     "dbName": "jonnyrosero_score",
     "refreshStartDate": "2026-04-24",
     "refreshDays": 2,
@@ -95,7 +95,7 @@
   },
   "featured": [
     {
-      "id": 2203,
+      "id": 2206,
       "run_date": "2026-04-24",
       "game_date": "2026-04-24",
       "board_display_date": "2026-04-24",
@@ -133,11 +133,11 @@
       "model_version": "score_model_2026_xgb_calibrated",
       "projection_stage": "shadow_retrained",
       "source_view": "v_score_predictions_board_active_v1",
-      "created_at": "2026-04-24T18:33:12",
-      "updated_at": "2026-04-24T18:33:12"
+      "created_at": "2026-04-24T18:37:13",
+      "updated_at": "2026-04-24T18:37:13"
     },
     {
-      "id": 2202,
+      "id": 2205,
       "run_date": "2026-04-24",
       "game_date": "2026-04-24",
       "board_display_date": "2026-04-24",
@@ -175,8 +175,8 @@
       "model_version": "score_model_2026_xgb_calibrated",
       "projection_stage": "shadow_retrained",
       "source_view": "v_score_predictions_board_active_v1",
-      "created_at": "2026-04-24T18:33:12",
-      "updated_at": "2026-04-24T18:33:12"
+      "created_at": "2026-04-24T18:37:13",
+      "updated_at": "2026-04-24T18:37:13"
     }
   ],
   "games": [
@@ -511,7 +511,7 @@
       "vegas_total_line": 8.0,
       "vegas_spread_away": -1.5,
       "vegas_spread_home": 1.5,
-      "away_spread_price_american": 125.0,
+      "away_spread_price_american": 120.0,
       "home_spread_price_american": -134.0,
       "projected_ou_pick": "UNDER",
       "projected_total_edge": -0.269,
@@ -1007,8 +1007,8 @@
       "vegas_total_line": 7.5,
       "vegas_spread_away": 1.5,
       "vegas_spread_home": -1.5,
-      "away_spread_price_american": -179.0,
-      "home_spread_price_american": 163.0,
+      "away_spread_price_american": -180.0,
+      "home_spread_price_american": 160.0,
       "projected_ou_pick": "OVER",
       "projected_total_edge": 0.026,
       "projected_ou_prob": 0.47902,
